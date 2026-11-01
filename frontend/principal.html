@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Principal - IZAR</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <!-- Mantenemos la clase "caja" para el ancho móvil y añadimos "aplicacion" para la distribución interna -->
+    <main class="caja aplicacion">
+        
+        <!-- Cabecera: Logo y Perfil -->
+        <header class="cabecera-app">
+            <div class="marca">
+                <svg class="estrella" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                </svg>
+                <span class="nombre">IZAR</span>
+            </div>
+            <!-- Icono temporal de perfil usando un emoji -->
+            <div class="icono-perfil">👤</div> 
+        </header>
+
+        <!-- Indicador central circular y botón de registro -->
+        <section class="tarjeta-indicador">
+            <div class="circulo-progreso">
+                <div class="texto-circulo">
+                    <h4>Día 14 de tu ciclo</h4>
+                    <p>Próximo periodo en 4 días</p>
+                </div>
+            </div>
+            <!-- Reutilizamos tu clase de botón principal -->
+            <button id="registro" class="boton boton-principal">REGISTRAR HOY (+)</button>
+        </section>
+
+        <!-- Tira del calendario semanal -->
+        <section class="calendario-semanal">
+            <div class="dia">L</div>
+            <div class="dia activo">M</div> <!-- "activo" pinta el día en rosa -->
+            <div class="dia">X</div>
+            <div class="dia">J</div>
+            <div class="dia">V</div>
+            <div class="dia">S</div>
+            <div class="dia">D</div>
+        </section>
+
+        <!-- Caja de síntomas en formato cuadrícula 2x2 -->
+        <section class="caja-sintomas">
+            <h3 class="titulo-seccion">REGISTRO RÁPIDO DE HOY</h3>
+            <div class="grid-sintomas">
+                <button class="boton-sintoma"><span>〰️</span> Cólicos</button>
+                <button class="boton-sintoma"><span>💧</span> Flujo</button>
+                <button class="boton-sintoma"><span>🙂</span> Ánimo</button>
+                <button class="boton-sintoma"><span>💤</span> Sueño</button>
+            </div>
+        </section>
+
+        <!-- Barra de navegación inferior anclada abajo -->
+        <nav class="navegacion-inferior">
+            <a href="#" class="nav-item activo"><span>🏠</span> Inicio</a>
+            <a href="#" class="nav-item"><span>📅</span> Calendario</a>
+            <a href="#" class="nav-item"><span>📊</span> Estadísticas</a>
+            <a href="#" class="nav-item"><span>👤</span> Perfil</a>
+        </nav>
+
+    </main>
+    <script src="js/principal.js"></script>
+</body>
+</html>

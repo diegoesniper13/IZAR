@@ -1,0 +1,360 @@
+/* Importamos una fuente moderna y profesional (Inter) */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: #FFF0F5; /* Fondo general sutilmente rosa */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    font-family: 'Inter', system-ui, sans-serif;
+    color: #333;
+}
+
+/* --- CONTENEDOR PRINCIPAL (Estilo Tarjeta Blanca) --- */
+.caja {
+    background-color: #ffffff; /* Caja blanca para dar aspecto limpio y profesional */
+    padding: 35px 25px;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05); /* Sombra elegante en lugar de borde negro */
+    width: 100%;
+    max-width: 380px; 
+    margin: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+/* --- LOGO Y MARCA --- */
+.marca {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 25px;
+}
+
+.marca-grande {
+    flex-direction: column;
+    justify-content: center;
+    margin-bottom: 15px;
+    margin-top: 10px;
+}
+
+/* Color rosa estético para la estrella */
+.estrella {
+    width: 28px;
+    height: 28px;
+    fill: #F06292; 
+}
+
+.marca-grande .estrella {
+    width: 54px;
+    height: 54px;
+}
+
+.nombre {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    color: #222;
+}
+
+.marca-grande .nombre {
+    font-size: 32px;
+    margin-top: 8px;
+}
+
+.lema {
+    text-align: center;
+    color: #666;
+    font-size: 15px;
+    line-height: 1.5;
+    margin-bottom: 30px;
+}
+
+.titulo {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 25px;
+    color: #111;
+}
+
+/* --- FORMULARIOS --- */
+.campo {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 18px;
+}
+
+.campo label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #555;
+}
+
+.campo input {
+    padding: 14px 16px;
+    border: 1px solid #E0E0E0;
+    border-radius: 10px;
+    font-size: 15px;
+    transition: all 0.2s ease;
+    font-family: inherit;
+    background-color: #FAFAFA;
+}
+
+/* Efecto al hacer clic en el input */
+.campo input:focus {
+    border-color: #F06292;
+    background-color: #ffffff;
+    outline: none;
+    box-shadow: 0 0 0 4px rgba(240, 98, 146, 0.15);
+}
+
+.ayuda {
+    font-size: 12px;
+    color: #888;
+    margin-top: 2px;
+}
+
+/* --- BOTONES (Sin subrayados y estéticos) --- */
+.acciones {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.boton {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    padding: 14px;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none; /* Quita el subrayado de los links */
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+    font-family: inherit;
+}
+
+/* Botón Rosa */
+.boton-principal {
+    background-color: #F06292;
+    color: white;
+    box-shadow: 0 4px 10px rgba(240, 98, 146, 0.3);
+    margin-top: 10px;
+}
+
+.boton-principal:hover {
+    background-color: #E91E63;
+    transform: translateY(-2px); /* Se levanta un poco al pasar el ratón */
+    box-shadow: 0 6px 15px rgba(233, 30, 99, 0.4);
+}
+
+/* Botón Blanco con borde rosa */
+.boton-secundario {
+    background-color: white;
+    color: #F06292;
+    border: 2px solid #F06292;
+}
+
+.boton-secundario:hover {
+    background-color: #FFF0F5;
+}
+
+/* --- MENSAJES Y ENLACE VOLVER --- */
+#mensaje {
+    text-align: center;
+    font-size: 14px;
+    color: #D32F2F; 
+    min-height: 20px;
+    margin-top: 15px;
+}
+
+.volver {
+    text-align: center;
+    display: block;
+    color: #999;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    margin-top: 20px;
+    transition: color 0.2s;
+}
+
+.volver:hover {
+    color: #F06292;
+}
+/* =========================================
+   ESTILOS ESPECÍFICOS DE LA PANTALLA PRINCIPAL
+   ========================================= */
+
+/* Ajustes del contenedor principal para comportarse como una pantalla de app */
+.aplicacion {
+    padding: 20px 20px 80px 20px; /* El 80px inferior deja espacio para no pisar el menú */
+    position: relative; /* Permite anclar el menú inferior a esta caja */
+    background-color: #FAFAFA; /* Fondo interno ligeramente grisáceo */
+    min-height: 700px; /* Forzamos un alto simulado de móvil */
+    justify-content: flex-start;
+    overflow: hidden; /* Oculta lo que sobresalga de la caja */
+}
+
+/* Cabecera superior */
+.cabecera-app {
+    display: flex;
+    justify-content: space-between; /* Separa el logo a la izquierda y el perfil a la derecha */
+    align-items: center;
+    margin-bottom: 25px;
+}
+.cabecera-app .marca {
+    margin-bottom: 0;
+}
+.icono-perfil {
+    font-size: 24px;
+    cursor: pointer;
+}
+
+/* UI Central (Tarjeta del círculo) */
+.tarjeta-indicador {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.circulo-progreso {
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    /* Simulamos el progreso con un borde grueso gris y una parte gris oscura */
+    border: 12px solid #E0E0E0;
+    border-top-color: #9e9e9e; 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.texto-circulo h4 {
+    font-size: 15px;
+    color: #111;
+    margin-bottom: 4px;
+}
+
+.texto-circulo p {
+    font-size: 12px;
+    color: #666;
+}
+
+/* Tira de calendario */
+.calendario-semanal {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 30px;
+    padding: 0 5px;
+}
+
+.dia {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 14px;
+    font-weight: 600;
+    color: #555;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    cursor: pointer;
+}
+
+.dia.activo {
+    background-color: #F06292;
+    color: white;
+    border-color: #F06292;
+}
+
+/* Caja gris de Síntomas */
+.caja-sintomas {
+    background: #F5F5F5;
+    border-radius: 12px;
+    padding: 18px;
+    border: 1px solid #E0E0E0;
+}
+
+.titulo-seccion {
+    font-size: 11px;
+    font-weight: 700;
+    color: #444;
+    margin-bottom: 15px;
+    letter-spacing: 0.5px;
+}
+
+.grid-sintomas {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Divide el espacio en 2 columnas iguales */
+    gap: 12px; /* Separación entre los botones */
+}
+
+.boton-sintoma {
+    background: white;
+    border: 1px solid #ddd;
+    padding: 12px 10px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.boton-sintoma:hover {
+    border-color: #F06292;
+    background-color: #FFF0F5;
+}
+
+/* Menú inferior anclado */
+.navegacion-inferior {
+    position: absolute; /* Se posiciona respecto a la caja principal */
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: white;
+    display: flex;
+    justify-content: space-around;
+    padding: 15px 0 20px 0;
+    border-top: 1px solid #eee;
+    border-bottom-left-radius: 16px;
+    border-bottom-right-radius: 16px;
+}
+
+.nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-decoration: none;
+    color: #999;
+    font-size: 11px;
+    font-weight: 500;
+    gap: 5px;
+}
+
+.nav-item span {
+    font-size: 22px; /* Tamaño de los iconos (emojis en este caso) */
+}
+
+.nav-item.activo {
+    color: #F06292; /* Pinta de rosa la pestaña actual */
+}

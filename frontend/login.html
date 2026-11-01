@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar sesión - IZAR</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <main class="caja">
+        <div class="marca">
+            <svg class="estrella" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+            </svg>
+            <span class="nombre">IZAR</span>
+        </div>
+
+        <h1 class="titulo">Iniciar sesión</h1>
+
+        <div class="campo">
+            <label for="usuario">Usuario</label>
+            <input type="text" id="usuario" autocomplete="username" autocapitalize="none" spellcheck="false">
+        </div>
+
+        <div class="campo">
+            <label for="contrasena">Contraseña</label>
+            <input type="password" id="contrasena" autocomplete="current-password">
+        </div>
+
+        <button id="entrar" class="boton boton-principal">Iniciar sesión</button>
+        <p id="mensaje" role="alert"></p>
+
+        <a class="volver" href="index.html">Volver</a>
+    </main>
+
+    <script src="js/login.js"></script>
+</body>
+</html>
