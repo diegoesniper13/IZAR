@@ -199,10 +199,9 @@ body {
 
 /* Ajustes del contenedor principal para comportarse como una pantalla de app */
 .aplicacion {
-    padding: 20px 20px 80px 20px; /* El 80px inferior deja espacio para no pisar el menú */
-    position: relative; /* Permite anclar el menú inferior a esta caja */
+    padding: 20px; /* Antes abajo eran 80px para no pisar el menú inferior (quitado por ahora) */
+    position: relative;
     background-color: #FAFAFA; /* Fondo interno ligeramente grisáceo */
-    min-height: 700px; /* Forzamos un alto simulado de móvil */
     justify-content: flex-start;
     overflow: hidden; /* Oculta lo que sobresalga de la caja */
 }
@@ -325,7 +324,8 @@ body {
     background-color: #FFF0F5;
 }
 
-/* Menú inferior anclado */
+/* Menú inferior anclado.
+   AHORA NO SE USA: se quitó de principal.html. Se deja aquí para cuando se vuelva a poner. */
 .navegacion-inferior {
     position: absolute; /* Se posiciona respecto a la caja principal */
     bottom: 0;
@@ -357,4 +357,39 @@ body {
 
 .nav-item.activo {
     color: #F06292; /* Pinta de rosa la pestaña actual */
+}
+
+/* --- VENTANA DEL CALENDARIO (registrar periodo) --- */
+.ventana {
+    margin: auto;                /* la centra en la pantalla */
+    width: 90%;
+    max-width: 340px;
+    padding: 25px 22px;
+    border: none;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    font-family: inherit;
+    color: #333;
+}
+
+/* ::backdrop es el fondo que queda detrás de la ventana: lo oscurecemos un poco */
+.ventana::backdrop {
+    background-color: rgba(0, 0, 0, 0.35);
+}
+
+.titulo-ventana {
+    font-size: 18px;
+    font-weight: 700;
+    color: #111;
+    margin-bottom: 15px;
+}
+
+/* Para que el texto de "empezó el día..." no quede pegado al campo de abajo */
+#info-inicio {
+    margin-bottom: 15px;
+}
+
+/* Clase que principal.js pone o quita para esconder el campo de inicio */
+.oculto {
+    display: none;
 }

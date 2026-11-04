@@ -7,10 +7,10 @@
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
-    <!-- Mantenemos la clase "caja" para el ancho móvil y añadimos "aplicacion" para la distribución interna -->
+    <!-- "caja" da el ancho de móvil y "aplicacion" la distribución interna de la pantalla -->
     <main class="caja aplicacion">
-        
-        <!-- Cabecera: Logo y Perfil -->
+
+        <!-- ===================== CABECERA: logo y perfil ===================== -->
         <header class="cabecera-app">
             <div class="marca">
                 <svg class="estrella" viewBox="0 0 24 24" aria-hidden="true">
@@ -19,25 +19,28 @@
                 <span class="nombre">IZAR</span>
             </div>
             <!-- Icono temporal de perfil usando un emoji -->
-            <div class="icono-perfil">👤</div> 
+            <div class="icono-perfil">👤</div>
         </header>
 
-        <!-- Indicador central circular y botón de registro -->
+        <!-- ===================== CÍRCULO Y BOTÓN DE REGISTRO ===================== -->
         <section class="tarjeta-indicador">
             <div class="circulo-progreso">
                 <div class="texto-circulo">
-                    <h4>Día 14 de tu ciclo</h4>
-                    <p>Próximo periodo en 4 días</p>
+                    <!-- Textos de espera: principal.js los sustituye con los datos de /dashboard -->
+                    <h4 id="dia-ciclo">Cargando...</h4>
+                    <p id="proximo-periodo"></p>
                 </div>
             </div>
-            <!-- Reutilizamos tu clase de botón principal -->
-            <button id="registro" class="boton boton-principal">REGISTRAR HOY (+)</button>
+            <!-- Abre la ventana del calendario. principal.js cambia el texto:
+                 "REGISTRAR PERIODO (+)" o "TERMINAR PERIODO" si hay uno en curso -->
+            <button id="registro" class="boton boton-principal">REGISTRAR PERIODO (+)</button>
         </section>
 
-        <!-- Tira del calendario semanal -->
+        <!-- ===================== TIRA DEL CALENDARIO SEMANAL ===================== -->
+        <!-- principal.js pone la clase "activo" (rosa) al día de la semana de hoy -->
         <section class="calendario-semanal">
             <div class="dia">L</div>
-            <div class="dia activo">M</div> <!-- "activo" pinta el día en rosa -->
+            <div class="dia">M</div>
             <div class="dia">X</div>
             <div class="dia">J</div>
             <div class="dia">V</div>
@@ -45,7 +48,7 @@
             <div class="dia">D</div>
         </section>
 
-        <!-- Caja de síntomas en formato cuadrícula 2x2 -->
+        <!-- ===================== SÍNTOMAS (cuadrícula 2x2) ===================== -->
         <section class="caja-sintomas">
             <h3 class="titulo-seccion">REGISTRO RÁPIDO DE HOY</h3>
             <div class="grid-sintomas">
@@ -56,15 +59,40 @@
             </div>
         </section>
 
-        <!-- Barra de navegación inferior anclada abajo -->
-        <nav class="navegacion-inferior">
-            <a href="#" class="nav-item activo"><span>🏠</span> Inicio</a>
-            <a href="#" class="nav-item"><span>📅</span> Calendario</a>
-            <a href="#" class="nav-item"><span>📊</span> Estadísticas</a>
-            <a href="#" class="nav-item"><span>👤</span> Perfil</a>
-        </nav>
+        <!-- ===================== VENTANA DEL CALENDARIO =====================
+             <dialog> es una ventana que sale por encima de la página.
+             Está oculta hasta que principal.js la abre con .showModal().
+             La ponemos al final porque no ocupa sitio en la pantalla. -->
+        <dialog id="ventana-registro" class="ventana">
+            <h3 id="titulo-ventana" class="titulo-ventana">Registrar periodo</h3>
+
+            <!-- Solo se ve al terminar un periodo: dice cuándo empezó -->
+            <p id="info-inicio" class="ayuda"></p>
+
+            <!-- type="date" hace que el navegador muestre un calendario para elegir el día -->
+            <div class="campo" id="campo-inicio">
+                <label for="fecha-inicio">Fecha de inicio</label>
+                <input type="date" id="fecha-inicio">
+            </div>
+
+            <div class="campo">
+                <label for="fecha-fin">Fecha de fin</label>
+                <input type="date" id="fecha-fin">
+                <!-- Si no se elige fin, el periodo se guarda "en curso" y se termina más tarde -->
+                <span id="ayuda-fin" class="ayuda">Déjala vacía si tu periodo sigue en curso</span>
+            </div>
+
+            <!-- Aquí principal.js escribe los errores (usa el estilo #mensaje de styles.css) -->
+            <p id="mensaje"></p>
+
+            <div class="acciones">
+                <button id="guardar-periodo" class="boton boton-principal">GUARDAR</button>
+                <button id="cancelar-periodo" class="boton boton-secundario">CANCELAR</button>
+            </div>
+        </dialog>
 
     </main>
+
     <script src="js/principal.js"></script>
 </body>
 </html>

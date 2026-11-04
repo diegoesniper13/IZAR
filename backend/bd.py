@@ -1,8 +1,8 @@
 # bd.py
 # Todo lo que habla con la base de datos regla.db: las usuarias y sus periodos.
 
-import os
-import sqlite3                                   # módulo para hablar con la base de datos SQLite
+import os                                        # para construir la ruta del archivo regla.db
+import sqlite3                                  # módulo para hablar con la base de datos SQLite
 from datetime import date                        # para convertir textos como "2026-01-01" en fechas
 from werkzeug.security import generate_password_hash, check_password_hash   # para guardar contraseñas de forma segura
 
@@ -20,7 +20,6 @@ RUTA_BD = os.path.join(os.path.dirname(os.path.abspath(__file__)), "regla.db")
 def obtener_periodos(usuario) -> list:
     conexion = sqlite3.connect(RUTA_BD)          # abre el archivo de la base de datos
     cursor = conexion.cursor()                   # el "mando" para enviar órdenes SQL
-
     # La tabla periodos guarda el id numérico de la usuaria (usuario_id), pero la sesión
     # tiene su nombre de usuario. La subconsulta (SELECT id FROM usuarios ...) traduce
     # el nombre al id, y el WHERE deja solo los periodos de esa usuaria.
@@ -49,7 +48,8 @@ def creador_de_fecha_periodo(filas) -> list:
             # fila[0] es el inicio y fila[1] el fin (ya no hay columna id en el SELECT)
             # date.fromisoformat convierte el texto "año-mes-día" en una fecha de verdad
             "inicio": date.fromisoformat(fila[0]),
-            "fin": date.fromisoformat(fila[1])
+            # Si el periodo sigue en curso, fin está vacío (None en Python): lo dejamos como None
+            "fin": date.fromisoformat(fila[1]) if fila[1] is not None else None
         }
         periodos.append(periodo)
     return periodos
@@ -57,7 +57,8 @@ def creador_de_fecha_periodo(filas) -> list:
 
 # Guarda un periodo nuevo a nombre de una usuaria.
 # Devuelve True si se guardó, y False si esa usuaria no existe.
-def guardar_periodo(usuario, inicio, fin) -> bool:
+# fin=None: si no se pasa el fin, se guarda vacío (periodo en curso).
+def guardar_periodo(usuario, inicio, fin=None) -> bool:
     conexion = sqlite3.connect(RUTA_BD)
     cursor = conexion.cursor()
     try:
@@ -77,12 +78,44 @@ def guardar_periodo(usuario, inicio, fin) -> bool:
     return True
 
 
+# Pone la fecha de fin al periodo que está abierto (fin vacío) de una usuaria.
+# Devuelve True si se actualizó un periodo, y False si no había ninguno abierto.
+def final_periodo(usuario, inicio, fin) -> bool:
+    conexion = sqlite3.connect(RUTA_BD)
+    cursor = conexion.cursor()
+    try:
+        # UPDATE cambia una fila que YA existe (INSERT crearía una nueva).
+        # SET fin = ?           -> la columna que cambiamos y su nuevo valor
+        # WHERE ... AND ... AND -> qué fila cambiamos; tienen que cumplirse las tres:
+        #   - que el periodo sea de esta usuaria (la subconsulta traduce el nombre al id)
+        #   - que empiece en la fecha "inicio" que nos pasan
+        #   - que siga abierto: fin IS NULL (en SQL lo vacío se mira con IS NULL, no con = NULL)
+        # Los ? se rellenan por orden: fin, usuario, inicio.
+        cursor.execute(
+            "UPDATE periodos SET fin = ? "
+            "WHERE usuario_id = (SELECT id FROM usuarios WHERE usuario = ?) "
+            "AND inicio = ? "
+            "AND fin IS NULL",
+            (fin, usuario, inicio)
+        )
+        conexion.commit()
+    except sqlite3.IntegrityError:
+        conexion.close()
+        return False
+    # rowcount = cuántas filas ha cambiado el UPDATE.
+    # Si es 0, no había ningún periodo abierto con esos datos: devolvemos False.
+    # (Un UPDATE que no encuentra nada NO da error, por eso hace falta esta comprobación.)
+    filas_cambiadas = cursor.rowcount
+    conexion.close()
+    return filas_cambiadas > 0
+
+
 # ---------------------------------------------------------------
 # USUARIAS
 # ---------------------------------------------------------------
 
 # Crea una cuenta nueva. Devuelve True si se creó, y False si ese usuario ya existe.
-def crear_usuario(usuario, nombre, contrasena):
+def crear_usuario(usuario, nombre, contrasena) -> bool:
     conexion = sqlite3.connect(RUTA_BD)
     cursor = conexion.cursor()
     hash_contrasena = generate_password_hash(contrasena)      # la contraseña nunca se guarda tal cual
@@ -100,7 +133,7 @@ def crear_usuario(usuario, nombre, contrasena):
 
 
 # Comprueba usuario y contraseña. Devuelve True si son correctos.
-def iniciar_sesion(usuario, contrasena):
+def iniciar_sesion(usuario, contrasena) -> bool:
     conexion = sqlite3.connect(RUTA_BD)
     cursor = conexion.cursor()
     cursor.execute("SELECT contrasena_hash FROM usuarios WHERE usuario = ?", (usuario,))

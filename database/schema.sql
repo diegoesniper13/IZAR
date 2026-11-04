@@ -9,5 +9,5 @@ CREATE TABLE IF NOT EXISTS periodos (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     usuario_id INTEGER NOT NULL REFERENCES usuarios(id),
     inicio TEXT NOT NULL,
-    fin TEXT NOT NULL
+    fin TEXT          -- puede quedar vacío (NULL) mientras el periodo sigue en curso
 );
