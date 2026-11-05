@@ -257,6 +257,47 @@ def fin_periodo():
 
 
 # ---------------------------------------------------------------
+# RUTA 7: POST /sintoma  ->  guarda un síntoma de un día
+# ---------------------------------------------------------------
+# El cliente envía: {"fecha": "2026-11-05", "sintoma": "colicos"}
+# Un síntoma por petición. Si un día hay varios, se envía una petición por cada uno.
+@app.route("/sintoma", methods=["POST"])
+def nuevo_sintoma():
+    # 1. SEGURIDAD: la usuaria SIEMPRE sale de la sesión, nunca del JSON.
+    # Si la leyéramos del JSON, cualquiera podría guardar síntomas en la cuenta de otra.
+    usuario = session.get("usuario")
+    if not usuario:
+        return jsonify({"error": "No autorizado. Inicia sesión antes"}), 401
+
+    # 2. LEER DATOS: los dos son obligatorios, por eso usamos corchetes y no .get()
+    # (si falta alguno salta KeyError y respondemos "Faltan datos")
+    datos = request.get_json()
+    try:
+        fecha = date.fromisoformat(datos["fecha"])     # texto "2026-11-05" -> fecha de verdad
+        sintoma = datos["sintoma"]                     # por ejemplo "colicos"
+    except (KeyError, TypeError, ValueError):          # falta una clave, no hay JSON o la fecha no existe
+        return jsonify({"error": "Faltan datos"}), 400
+
+    # 3. VALIDAR con ciclos.py
+    # 3A. La fecha no puede ser futura (reutilizamos la validación del inicio de periodo)
+    if not ciclos.validar_inicio_nuevo_periodo(fecha):
+        return jsonify({"error": "La fecha no puede ser futura"}), 400
+
+    # 3B. El síntoma tiene que ser uno de los que existen en la app
+    if not ciclos.validar_sintoma(sintoma):
+        return jsonify({"error": "Ese síntoma no existe"}), 400
+
+    # 4. GUARDAR. La fecha va como texto con .isoformat(), igual que en los periodos.
+    # guardar_sintoma devuelve False si ese síntoma ya estaba guardado ese día.
+    # (Que la usuaria no exista no puede pasar aquí: viene de una sesión válida.)
+    if not bd.guardar_sintoma(usuario, fecha.isoformat(), sintoma):
+        return jsonify({"error": "Ya registraste ese síntoma ese día"}), 409   # 409 = "conflicto: eso ya existe"
+
+    # 5. RESPONDER: 201 = "creado"
+    return jsonify({"guardado": True}), 201
+
+
+# ---------------------------------------------------------------
 # ARRANQUE DEL SERVIDOR
 # ---------------------------------------------------------------
 if __name__ == "__main__":                       # solo se cumple si ejecutas ESTE archivo directamente

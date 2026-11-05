@@ -313,6 +313,78 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
 
+    // ---------------------------------------------------------------
+    // BOTONES DE SÍNTOMAS: guardan el síntoma con la fecha de hoy
+    // ---------------------------------------------------------------
+    const botonesSintoma = document.querySelectorAll(".boton-sintoma");
+    const mensajeSintomas = document.querySelector("#mensaje-sintomas");
+
+    // forEach recorre la lista de botones y le pone a CADA uno el mismo "escuchador" de clic
+    botonesSintoma.forEach((boton) => {
+        boton.addEventListener("click", async () => {
+            // dataset.sintoma lee el atributo data-sintoma del HTML: "colicos", "flujo"...
+            const sintoma = boton.dataset.sintoma;
+            // Texto visible del botón sin el emoji, para los mensajes ("Cólicos").
+            // Quitamos el texto del <span> (el emoji) y los espacios de los lados con trim().
+            const emoji = boton.querySelector("span").textContent;
+            const nombreVisible = boton.textContent.replace(emoji, "").trim();
+
+            // Quitamos el mensaje anterior
+            mensajeSintomas.textContent = "";
+            mensajeSintomas.classList.remove("error");
+
+            boton.disabled = true;                   // evita dos clics seguidos mientras esperamos
+
+            try {
+                // Enviamos {"fecha": "2026-11-05", "sintoma": "colicos"} a la ruta 7 de app.py
+                const respuesta = await fetch("/sintoma", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ fecha: fechaDeHoy(), sintoma: sintoma })
+                });
+
+                if (respuesta.status === 401) {      // la sesión ha caducado
+                    window.location.href = "login.html";
+                    return;
+                }
+
+                // 500 = el servidor ha fallado por dentro (un error de Python).
+                // En ese caso Flask no devuelve JSON sino una página HTML, y .json() fallaría:
+                // por eso lo comprobamos antes y lo explicamos. El detalle está en la terminal de Flask.
+                if (respuesta.status === 500) {
+                    mensajeSintomas.textContent = "Error en el servidor. Mira la terminal de Flask";
+                    mensajeSintomas.classList.add("error");
+                    boton.disabled = false;
+                    return;
+                }
+
+                const datos = await respuesta.json();
+
+                if (respuesta.ok) {
+                    // 201: guardado. Pintamos el botón para que se vea que ya está registrado.
+                    boton.classList.add("seleccionado");
+                    mensajeSintomas.textContent = `${nombreVisible}: guardado para hoy`;
+                } else if (respuesta.status === 409) {
+                    // 409: ya estaba guardado hoy. No es un fallo grave: lo marcamos igualmente.
+                    boton.classList.add("seleccionado");
+                    mensajeSintomas.textContent = `${nombreVisible}: ya estaba registrado hoy`;
+                } else {
+                    // Cualquier otro error: mostramos el mensaje que mandó app.py, en rojo
+                    mensajeSintomas.textContent = datos.error;
+                    mensajeSintomas.classList.add("error");
+                }
+
+            } catch (error) {
+                console.error("Error de conexión:", error);
+                mensajeSintomas.textContent = "No se pudo conectar con el servidor";
+                mensajeSintomas.classList.add("error");
+            }
+
+            boton.disabled = false;                  // volvemos a activar el botón
+        });
+    });
+
+
     // Al abrir la página: marcamos el día de hoy (no necesita al servidor)
     // y cargamos los datos por primera vez
     marcarDiaDeHoy();

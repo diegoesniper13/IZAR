@@ -119,3 +119,14 @@ def solapamiento_ciclos(periodos, inicio) -> bool:
         if distancia < 15:
             return False                            # está demasiado cerca: no se puede guardar
     return True                                     # ha pasado todos los periodos sin problema
+
+
+# FUNCIÓN 9: comprobar que un síntoma es uno de los que existen en la app
+# Recibe el nombre del síntoma como texto y devuelve True si es válido.
+# Se escriben siempre igual (minúsculas y sin tildes) para que en la base de datos
+# "colicos" no aparezca a veces como "Cólicos" y cuente como otro síntoma distinto.
+SINTOMAS_VALIDOS = ["colicos", "flujo", "animo", "sueno"]
+
+def validar_sintoma(sintoma) -> bool:
+    # "in" mira si el valor está dentro de la lista: devuelve True o False directamente
+    return sintoma in SINTOMAS_VALIDOS

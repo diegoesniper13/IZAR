@@ -77,7 +77,6 @@ def guardar_periodo(usuario, inicio, fin=None) -> bool:
     conexion.close()
     return True
 
-
 # Pone la fecha de fin al periodo que está abierto (fin vacío) de una usuaria.
 # Devuelve True si se actualizó un periodo, y False si no había ninguno abierto.
 def final_periodo(usuario, inicio, fin) -> bool:
@@ -143,3 +142,32 @@ def iniciar_sesion(usuario, contrasena) -> bool:
         return False
     # check_password_hash compara la contraseña escrita con el hash guardado (fila[0])
     return check_password_hash(fila[0], contrasena)
+
+
+# ---------------------------------------------------------------
+# SÍNTOMAS
+# ---------------------------------------------------------------
+
+# Guarda un síntoma de una usuaria en un día concreto.
+# "fecha" y "sintoma" llegan como texto, por ejemplo "2026-11-05" y "colicos".
+# Devuelve True si se guardó, y False si:
+#   - ese síntoma ya estaba guardado ese mismo día (la tabla tiene UNIQUE(usuario_id, fecha, sintoma)), o
+#   - la usuaria no existe (la subconsulta da "nada" y usuario_id es obligatorio).
+# En los dos casos SQLite da IntegrityError.
+def guardar_sintoma(usuario, fecha, sintoma) -> bool:
+    conexion = sqlite3.connect(RUTA_BD)
+    cursor = conexion.cursor()
+    try:
+        # Los tres ? se rellenan, por orden, con usuario, fecha y sintoma.
+        # La subconsulta traduce el nombre de usuario a su id, como en guardar_periodo.
+        cursor.execute(
+            "INSERT INTO sintomas (usuario_id, fecha, sintoma) "
+            "VALUES ((SELECT id FROM usuarios WHERE usuario = ?), ?, ?)",
+            (usuario, fecha, sintoma)
+        )
+        conexion.commit()                        # sin commit el dato NO se guarda en el archivo
+    except sqlite3.IntegrityError:               # síntoma repetido ese día o usuaria inexistente
+        conexion.close()
+        return False
+    conexion.close()
+    return True

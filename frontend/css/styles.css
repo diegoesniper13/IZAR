@@ -199,7 +199,7 @@ body {
 
 /* Ajustes del contenedor principal para comportarse como una pantalla de app */
 .aplicacion {
-    padding: 20px; /* Antes abajo eran 80px para no pisar el menú inferior (quitado por ahora) */
+    padding: 20px 20px 90px 20px; /* Los 90px de abajo dejan sitio para no pisar el menú inferior */
     position: relative;
     background-color: #FAFAFA; /* Fondo interno ligeramente grisáceo */
     justify-content: flex-start;
@@ -324,8 +324,29 @@ body {
     background-color: #FFF0F5;
 }
 
-/* Menú inferior anclado.
-   AHORA NO SE USA: se quitó de principal.html. Se deja aquí para cuando se vuelva a poner. */
+/* Síntoma ya guardado hoy: principal.js le pone esta clase */
+.boton-sintoma.seleccionado {
+    border-color: #F06292;
+    background-color: #FCE4EC;
+    color: #C2185B;
+    font-weight: 600;
+}
+
+/* Mensaje debajo de los síntomas ("Cólicos guardado", errores...) */
+.mensaje-sintomas {
+    text-align: center;
+    font-size: 13px;
+    color: #666;
+    min-height: 18px;                /* reserva el hueco para que la caja no "salte" */
+    margin-top: 12px;
+}
+
+/* Cuando el mensaje es un error, principal.js le añade la clase "error" */
+.mensaje-sintomas.error {
+    color: #D32F2F;
+}
+
+/* Menú inferior anclado (Registro / Estadísticas), en principal.html y estadisticas.html */
 .navegacion-inferior {
     position: absolute; /* Se posiciona respecto a la caja principal */
     bottom: 0;
@@ -392,4 +413,114 @@ body {
 /* Clase que principal.js pone o quita para esconder el campo de inicio */
 .oculto {
     display: none;
+}
+
+/* =========================================
+   ESTILOS DE LA PANTALLA DE ESTADÍSTICAS
+   ========================================= */
+
+/* Caja blanca genérica para cada bloque de estadísticas */
+.tarjeta {
+    background: #fff;
+    border: 1px solid #E0E0E0;
+    border-radius: 12px;
+    padding: 18px;
+    margin-bottom: 20px;
+}
+
+/* Texto pequeño gris debajo de un título (por ejemplo "Datos de ejemplo") */
+.nota {
+    font-size: 11px;
+    color: #999;
+    margin-top: -8px;
+    margin-bottom: 12px;
+}
+
+/* --- Lista de últimos periodos --- */
+.lista-periodos {
+    list-style: none;               /* quita los puntos de la lista */
+}
+
+/* Cada periodo: fechas a la izquierda y duración a la derecha */
+.fila-periodo {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid #F0F0F0;
+}
+
+.fila-periodo:last-child {
+    border-bottom: none;            /* la última fila no lleva línea debajo */
+}
+
+.fechas-periodo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    color: #333;
+}
+
+/* Puntito rosa delante de cada periodo */
+.punto {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #F06292;
+}
+
+/* Etiqueta con la duración, por ejemplo "6 días" */
+.duracion {
+    font-size: 12px;
+    font-weight: 600;
+    color: #C2185B;
+    background-color: #FCE4EC;
+    padding: 4px 10px;
+    border-radius: 20px;
+}
+
+/* --- Caja "Hoy" --- */
+.dato-grande {
+    text-align: center;
+    padding: 10px 0 18px 0;
+    border-bottom: 1px solid #F0F0F0;
+    margin-bottom: 15px;
+}
+
+/* El número del día del ciclo, bien grande */
+.dato-grande .numero {
+    display: block;
+    font-size: 44px;
+    font-weight: 700;
+    color: #F06292;
+    line-height: 1;
+}
+
+.dato-grande .etiqueta {
+    font-size: 13px;
+    color: #666;
+}
+
+.subtitulo-tarjeta {
+    font-size: 13px;
+    font-weight: 600;
+    color: #444;
+    margin-bottom: 10px;
+}
+
+/* Síntomas posibles como "pastillas" una al lado de otra */
+.lista-sintomas {
+    display: flex;
+    flex-wrap: wrap;                /* si no caben en una línea, bajan a la siguiente */
+    gap: 8px;
+}
+
+.pastilla {
+    font-size: 13px;
+    padding: 6px 12px;
+    border-radius: 20px;
+    background-color: #F5F5F5;
+    border: 1px solid #E0E0E0;
+    color: #555;
 }

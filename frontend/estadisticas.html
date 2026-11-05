@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estadísticas - IZAR</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <!-- Misma caja que principal.html, para que las dos pantallas se vean iguales -->
+    <main class="caja aplicacion">
+
+        <!-- ===================== CABECERA: logo y perfil ===================== -->
+        <header class="cabecera-app">
+            <div class="marca">
+                <svg class="estrella" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                </svg>
+                <span class="nombre">IZAR</span>
+            </div>
+            <div class="icono-perfil">👤</div>
+        </header>
+
+        <!-- ===================== ÚLTIMOS PERIODOS (máximo 5) =====================
+             Por ahora son datos de EJEMPLO escritos a mano.
+             Cuando esté la ruta del backend, estadisticas.js borrará estas filas
+             y pondrá los 5 últimos periodos reales con la misma estructura. -->
+        <section class="tarjeta">
+            <h3 class="titulo-seccion">ÚLTIMOS PERIODOS</h3>
+            <p class="nota">Datos de ejemplo</p>
+
+            <ul id="lista-periodos" class="lista-periodos">
+                <!-- Una fila por periodo: fechas a la izquierda, duración a la derecha -->
+                <li class="fila-periodo">
+                    <span class="fechas-periodo"><span class="punto"></span>04/11 – 09/11</span>
+                    <span class="duracion">6 días</span>
+                </li>
+                <li class="fila-periodo">
+                    <span class="fechas-periodo"><span class="punto"></span>07/10 – 12/10</span>
+                    <span class="duracion">6 días</span>
+                </li>
+                <li class="fila-periodo">
+                    <span class="fechas-periodo"><span class="punto"></span>09/09 – 13/09</span>
+                    <span class="duracion">5 días</span>
+                </li>
+                <li class="fila-periodo">
+                    <span class="fechas-periodo"><span class="punto"></span>11/08 – 16/08</span>
+                    <span class="duracion">6 días</span>
+                </li>
+                <li class="fila-periodo">
+                    <span class="fechas-periodo"><span class="punto"></span>14/07 – 18/07</span>
+                    <span class="duracion">5 días</span>
+                </li>
+            </ul>
+        </section>
+
+        <!-- ===================== HOY: día del ciclo y posibles síntomas ===================== -->
+        <section class="tarjeta">
+            <h3 class="titulo-seccion">HOY</h3>
+
+            <!-- El día del ciclo YA es real: estadisticas.js lo pide a /dashboard -->
+            <div class="dato-grande">
+                <span id="dia-ciclo" class="numero">–</span>
+                <span class="etiqueta">día de tu ciclo</span>
+            </div>
+
+            <!-- Posibles síntomas: por ahora de ejemplo, se conectará con el backend -->
+            <p class="subtitulo-tarjeta">Posibles síntomas</p>
+            <p class="nota">Datos de ejemplo</p>
+            <div id="lista-sintomas" class="lista-sintomas">
+                <span class="pastilla">〰️ Cólicos</span>
+                <span class="pastilla">💤 Sueño</span>
+                <span class="pastilla">🙂 Ánimo</span>
+            </div>
+        </section>
+
+        <!-- ===================== MENÚ INFERIOR =====================
+             Aquí la página activa (en rosa) es Estadísticas -->
+        <nav class="navegacion-inferior">
+            <a href="principal.html" class="nav-item"><span>📝</span> Registro</a>
+            <a href="estadisticas.html" class="nav-item activo"><span>📊</span> Estadísticas</a>
+        </nav>
+
+    </main>
+
+    <script src="js/estadisticas.js"></script>
+</body>
+</html>

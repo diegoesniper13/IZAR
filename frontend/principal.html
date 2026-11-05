@@ -51,12 +51,17 @@
         <!-- ===================== SÍNTOMAS (cuadrícula 2x2) ===================== -->
         <section class="caja-sintomas">
             <h3 class="titulo-seccion">REGISTRO RÁPIDO DE HOY</h3>
+            <!-- data-sintoma guarda el nombre que se envía al servidor. Tiene que coincidir
+                 con SINTOMAS_VALIDOS de ciclos.py (minúsculas y sin tildes).
+                 El texto que se ve puede llevar tildes: eso es solo para la usuaria. -->
             <div class="grid-sintomas">
-                <button class="boton-sintoma"><span>〰️</span> Cólicos</button>
-                <button class="boton-sintoma"><span>💧</span> Flujo</button>
-                <button class="boton-sintoma"><span>🙂</span> Ánimo</button>
-                <button class="boton-sintoma"><span>💤</span> Sueño</button>
+                <button class="boton-sintoma" data-sintoma="colicos"><span>〰️</span> Cólicos</button>
+                <button class="boton-sintoma" data-sintoma="flujo"><span>💧</span> Flujo</button>
+                <button class="boton-sintoma" data-sintoma="animo"><span>🙂</span> Ánimo</button>
+                <button class="boton-sintoma" data-sintoma="sueno"><span>💤</span> Sueño</button>
             </div>
+            <!-- Aquí principal.js escribe si se ha guardado o si ha habido un error -->
+            <p id="mensaje-sintomas" class="mensaje-sintomas"></p>
         </section>
 
         <!-- ===================== VENTANA DEL CALENDARIO =====================
@@ -90,6 +95,13 @@
                 <button id="cancelar-periodo" class="boton boton-secundario">CANCELAR</button>
             </div>
         </dialog>
+
+        <!-- ===================== MENÚ INFERIOR =====================
+             Enlaces normales (<a>) entre páginas. "activo" pinta de rosa la página actual. -->
+        <nav class="navegacion-inferior">
+            <a href="principal.html" class="nav-item activo"><span>📝</span> Registro</a>
+            <a href="estadisticas.html" class="nav-item"><span>📊</span> Estadísticas</a>
+        </nav>
 
     </main>
 
