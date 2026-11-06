@@ -6,10 +6,10 @@
 # IMPORTACIONES
 # ---------------------------------------------------------------
 import os                                        # para leer variables de entorno, como SECRET_KEY
-from datetime import date                        # para trabajar con fechas
+from datetime import date, timedelta             # para trabajar con fechas (y la duración de la sesión)
 from dotenv import load_dotenv                   # carga en memoria los valores del archivo .env
-from flask_cors import CORS                      # permite que una página web hable con este servidor
-from flask import Flask, jsonify, request, session
+from flask import Flask, jsonify, request, session, redirect
+from werkzeug.middleware.proxy_fix import ProxyFix   # para saber si llegó por HTTPS detrás de un proxy
 # Flask: la app; jsonify: responder en JSON; request: leer lo que envía el cliente;
 # session: guardar "quién ha entrado" (funciona como un diccionario)
 
@@ -17,6 +17,7 @@ from flask import Flask, jsonify, request, session
 # para que se vea a simple vista de qué archivo viene cada función.
 import bd                                        # todo lo que habla con la base de datos
 import ciclos                                    # todos los cálculos y validaciones de fechas
+import seguridad                                 # protecciones: CSRF, cabeceras, límites de intentos, log
 
 
 # ---------------------------------------------------------------
@@ -29,12 +30,75 @@ app = Flask(__name__, static_folder="../frontend", static_url_path="")
 
 # La clave secreta sirve para firmar la cookie de sesión. Sin ella, cualquiera podría
 # falsificarla. NO se escribe aquí: se lee del archivo .env, que no se sube a Git.
-load_dotenv()                                    # lee backend/.env y deja sus valores disponibles
+# load_dotenv busca el .env junto a app.py, arranques el servidor desde donde lo arranques.
+load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env"))
 app.secret_key = os.environ["SECRET_KEY"]        # si falta SECRET_KEY en el .env, el servidor no arranca (a propósito)
 
-# Más adelante, si el frontend se sirve desde otro sitio, habrá que ajustar CORS para que
-# acepte cookies (supports_credentials=True y un origen concreto). Por ahora se deja así.
-CORS(app)
+# Una clave corta se podría adivinar probando: exigimos al menos 32 caracteres.
+if len(app.secret_key) < 32:
+    raise RuntimeError("SECRET_KEY es demasiado corta: usa al menos 32 caracteres aleatorios")
+
+# ENTORNO=produccion en el .env del servidor de verdad. En tu ordenador no hace falta ponerlo.
+PRODUCCION = os.environ.get("ENTORNO") == "produccion"
+
+# Modo debug: SOLO si lo pides con FLASK_DEBUG=1 en el .env, y NUNCA en producción
+# (el modo debug enseña el código y deja ejecutar Python desde el navegador si hay un error).
+DEBUG = os.environ.get("FLASK_DEBUG") == "1" and not PRODUCCION
+
+# --- Cookie de sesión segura ---
+app.config.update(
+    SESSION_COOKIE_HTTPONLY=True,      # JavaScript no puede leer la cookie (aunque hubiera XSS)
+    SESSION_COOKIE_SAMESITE="Lax",     # el navegador no la manda en POST que vengan de otras webs (CSRF)
+    SESSION_COOKIE_SECURE=PRODUCCION,  # en producción, la cookie solo viaja por HTTPS
+    PERMANENT_SESSION_LIFETIME=timedelta(days=7),   # la sesión caduca a los 7 días
+    MAX_CONTENT_LENGTH=16 * 1024,      # peticiones de 16 KB como mucho (nuestros JSON ocupan muy poco)
+)
+
+# En producción la app estará detrás de un servidor (Nginx, etc.) que hace el HTTPS.
+# ProxyFix lee las cabeceras que ese servidor añade para saber la IP real y si llegó por HTTPS.
+if PRODUCCION:
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
+
+# CORS: NO lo activamos. El frontend lo sirve este mismo servidor, así que no hace falta,
+# y sin CORS ninguna otra web puede leer las respuestas de nuestra API.
+
+
+# ---------------------------------------------------------------
+# PROTECCIONES QUE SE APLICAN A TODAS LAS PETICIONES
+# ---------------------------------------------------------------
+# before_request: se ejecuta ANTES de cada ruta. Si devuelve algo, la ruta no llega a ejecutarse.
+@app.before_request
+def antes_de_cada_peticion():
+    # 1. Forzar HTTPS en producción: si alguien entra por http://, lo mandamos a https://
+    if PRODUCCION and not request.is_secure:
+        return redirect(request.url.replace("http://", "https://", 1), code=301)
+
+    # 2. Protección CSRF (ver seguridad.py)
+    return seguridad.comprobar_csrf()
+
+
+# after_request: se ejecuta DESPUÉS de cada ruta, justo antes de enviar la respuesta
+@app.after_request
+def despues_de_cada_peticion(respuesta):
+    return seguridad.poner_cabeceras(respuesta, PRODUCCION)
+
+
+# Errores en JSON, para que el JavaScript pueda leerlos y no se vea una página de error
+@app.errorhandler(413)
+def demasiado_grande(error):
+    seguridad.avisar(f"Petición demasiado grande en {request.path}")
+    return jsonify({"error": "Petición demasiado grande"}), 413
+
+
+@app.errorhandler(404)
+def no_encontrado(error):
+    return jsonify({"error": "No encontrado"}), 404
+
+
+@app.errorhandler(500)
+def error_interno(error):
+    # Al usuario no le enseñamos detalles (podrían dar pistas a un atacante); quedan en la terminal
+    return jsonify({"error": "Error interno del servidor"}), 500
 
 
 # ---------------------------------------------------------------
@@ -51,7 +115,13 @@ def inicio():
 # El cliente envía: {"usuario": "ana", "nombre": "Ana", "contrasena": "abc12345"}
 @app.route("/registro", methods=["POST"])
 def registro():
-    datos = request.get_json()                   # lo que envió el cliente, convertido en diccionario
+    # Límite: como mucho 10 cuentas nuevas por hora desde la misma IP (evita crear cuentas en masa)
+    clave_limite = f"registro:{seguridad.ip_cliente()}"
+    if seguridad.esta_bloqueado(clave_limite, seguridad.REGISTRO_MAX, seguridad.REGISTRO_VENTANA):
+        seguridad.avisar("Registro bloqueado: demasiadas cuentas nuevas desde esta IP")
+        return jsonify({"error": "Demasiados intentos. Prueba más tarde"}), 429   # 429 = "demasiadas peticiones"
+
+    datos = request.get_json(silent=True)        # silent=True: si no es JSON válido, da None (no un error)
     try:
         usuario = datos["usuario"]
         contrasena = datos["contrasena"]
@@ -59,10 +129,15 @@ def registro():
     except (KeyError, TypeError):                # KeyError: falta una clave; TypeError: no llegó un JSON válido
         return jsonify({"error": "Faltan datos"}), 400    # 400 = "la petición es incorrecta"
 
-    if usuario == "" or nombre == "":            # campos vacíos
+    # Comprobamos tipo y tamaño de cada dato (que sean textos y no demasiado largos)
+    if not seguridad.usuario_valido(usuario):
+        return jsonify({"error": "El usuario debe tener de 3 a 30 letras, números, puntos o guiones"}), 400
+    if not seguridad.es_texto(nombre, 1, 50):
         return jsonify({"error": "Datos no válidos"}), 400
-    if len(contrasena) < 8:                      # contraseña demasiado corta
-        return jsonify({"error": "Contraseña muy corta"}), 400
+    if not seguridad.es_texto(contrasena, 8, 128):    # mínimo 8; máximo 128 para no gastar CPU con textos enormes
+        return jsonify({"error": "La contraseña debe tener entre 8 y 128 caracteres"}), 400
+
+    seguridad.apuntar_intento(clave_limite)      # cuenta para el límite de registros
 
     # crear_usuario guarda el hash de la contraseña (nunca la contraseña original)
     # y devuelve False si ese nombre de usuario ya existe.
@@ -78,22 +153,37 @@ def registro():
 # El cliente envía: {"usuario": "ana", "contrasena": "abc12345"}
 @app.route("/login", methods=["POST"])
 def login():
-    datos = request.get_json()
+    datos = request.get_json(silent=True)
     try:
         usuario = datos["usuario"]
         contrasena = datos["contrasena"]
     except (KeyError, TypeError):
         return jsonify({"error": "Faltan datos"}), 400
 
+    # Tienen que ser textos de tamaño razonable
+    if not seguridad.es_texto(usuario, 1, 30) or not seguridad.es_texto(contrasena, 1, 128):
+        return jsonify({"error": "Usuario o contraseña incorrectos"}), 401
+
+    # Límite contra fuerza bruta: 5 fallos en 15 minutos para ese usuario desde esa IP -> bloqueo
+    clave_limite = f"login:{seguridad.ip_cliente()}:{usuario}"
+    if seguridad.esta_bloqueado(clave_limite, seguridad.LOGIN_MAX_FALLOS, seguridad.LOGIN_VENTANA):
+        seguridad.avisar(f"Login bloqueado por demasiados fallos (usuario: {usuario})")
+        return jsonify({"error": "Demasiados intentos fallidos. Espera 15 minutos"}), 429
+
     # iniciar_sesion compara la contraseña con el hash guardado.
     # El mensaje es el mismo si el usuario no existe o si la contraseña es incorrecta,
     # para que nadie pueda averiguar qué usuarios existen probando nombres.
     if not bd.iniciar_sesion(usuario, contrasena):
+        seguridad.apuntar_intento(clave_limite)
+        seguridad.avisar(f"Login fallido (usuario: {usuario})")      # nunca se guarda la contraseña
         return jsonify({"error": "Usuario o contraseña incorrectos"}), 401   # 401 = "no autorizado"
 
-    # Todo correcto: guardamos quién ha entrado. Flask lo mete en una cookie firmada
-    # con la SECRET_KEY, y el navegador la enviará en las siguientes peticiones.
+    # Todo correcto. Primero vaciamos la sesión anterior: así nadie puede "colar" una sesión
+    # preparada de antemano (ataque de fijación de sesión).
+    seguridad.borrar_intentos(clave_limite)
+    session.clear()
     session["usuario"] = usuario
+    session.permanent = True                     # usa la duración de PERMANENT_SESSION_LIFETIME (7 días)
     return jsonify({"login": True})
 
 
@@ -126,7 +216,8 @@ def dashboard():
             "dia_ciclo": 0,
             "dias_restantes": None,
             "periodo_abierto": False,            # sin periodos no puede haber ninguno abierto
-            "mensaje": "Registra tu primer periodo"
+            "mensaje": "Registra tu primer periodo",
+            "sintomas_posibles": []              # sin periodos no hay síntomas que prever
         })
 
     # 3B. CÁLCULOS con las funciones de ciclos.py
@@ -141,6 +232,11 @@ def dashboard():
     else:
         dias_restantes = None                    # con 1 solo periodo no se puede hacer media
 
+    # Síntomas que suele tener por estas fechas, según sus ciclos anteriores (función 5F).
+    # Devuelve una lista de nombres como ["colicos", "sueno"], o [] si aún no hay datos.
+    sintomas = bd.obtener_sintomas(usuario)
+    sintomas_posibles = ciclos.calcular_sintomas_posibles(dia_actual, periodos, sintomas)
+
     # 4. RESPUESTA CON DATOS
     return jsonify({
         "estado": "ok",
@@ -153,7 +249,9 @@ def dashboard():
         "periodo_abierto": ultimo_periodo["fin"] is None,
         # Fecha de inicio del último periodo, como texto. La ventana del calendario
         # la enseña al terminar un periodo y no deja elegir un fin anterior a ella.
-        "inicio_ultimo": fecha_inicio_ultimo.isoformat()
+        "inicio_ultimo": fecha_inicio_ultimo.isoformat(),
+        # Ya es una lista de textos: el JSON la acepta tal cual (estadisticas.js la enseña)
+        "sintomas_posibles": sintomas_posibles
     })
 
 
@@ -172,7 +270,7 @@ def nuevo_periodo():
         return jsonify({"error": "No autorizado. Inicia sesión antes"}), 401
 
     # 2. LEER DATOS: convertimos el texto "año-mes-día" en una fecha de verdad
-    datos = request.get_json()
+    datos = request.get_json(silent=True)
     try:
         fecha = date.fromisoformat(datos["fecha"])
         # El fin es OPCIONAL: .get() devuelve None si no viene (datos["fin"] daría KeyError)
@@ -228,7 +326,7 @@ def fin_periodo():
         return jsonify({"error": "No autorizado. Inicia sesión antes"}), 401
 
     # 2. LEER DATOS: get_json() CON paréntesis para obtener el diccionario
-    datos = request.get_json()
+    datos = request.get_json(silent=True)
     try:
         fecha = date.fromisoformat(datos["fecha"])     # texto "2026-11-09" -> fecha de verdad
     except (KeyError, ValueError, TypeError):          # falta la clave, no hay JSON o la fecha no existe
@@ -271,7 +369,7 @@ def nuevo_sintoma():
 
     # 2. LEER DATOS: los dos son obligatorios, por eso usamos corchetes y no .get()
     # (si falta alguno salta KeyError y respondemos "Faltan datos")
-    datos = request.get_json()
+    datos = request.get_json(silent=True)
     try:
         fecha = date.fromisoformat(datos["fecha"])     # texto "2026-11-05" -> fecha de verdad
         sintoma = datos["sintoma"]                     # por ejemplo "colicos"
@@ -297,10 +395,12 @@ def nuevo_sintoma():
     return jsonify({"guardado": True}), 201
 
 
+
 # ---------------------------------------------------------------
 # ARRANQUE DEL SERVIDOR
 # ---------------------------------------------------------------
 if __name__ == "__main__":                       # solo se cumple si ejecutas ESTE archivo directamente
-    # debug=True reinicia el servidor al guardar y enseña errores detallados.
-    # Solo para desarrollo en tu ordenador: NUNCA al publicar la app.
-    app.run(debug=True)
+    # El modo debug depende de FLASK_DEBUG en el .env (ver CONFIGURACIÓN): apagado por defecto.
+    # host="127.0.0.1": solo se puede entrar desde tu propio ordenador, no desde otros de tu red.
+    # En producción NO se usa app.run: se arranca con un servidor de verdad (gunicorn, waitress...).
+    app.run(host="127.0.0.1", debug=DEBUG)

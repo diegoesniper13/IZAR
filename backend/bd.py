@@ -38,6 +38,7 @@ def obtener_periodos(usuario) -> list:
     return creador_de_fecha_periodo(filas)
 
 
+
 # Traduce las filas al formato que esperan las funciones de ciclos.py
 # De: ('2026-01-01', '2026-01-06')                         <- tupla con textos
 # A:  {"inicio": date(2026,1,1), "fin": date(2026,1,6)}    <- diccionario con fechas
@@ -53,6 +54,7 @@ def creador_de_fecha_periodo(filas) -> list:
         }
         periodos.append(periodo)
     return periodos
+
 
 
 # Guarda un periodo nuevo a nombre de una usuaria.
@@ -171,3 +173,36 @@ def guardar_sintoma(usuario, fecha, sintoma) -> bool:
         return False
     conexion.close()
     return True
+
+# Devuelve TODOS los síntomas de una usuaria, del más antiguo al más reciente.
+# "usuario" es el nombre de usuario que está guardado en la sesión.
+# Si no tiene ninguno, devuelve una lista vacía [].
+def obtener_sintomas(usuario) -> list:
+    conexion = sqlite3.connect(RUTA_BD)
+    cursor = conexion.cursor()
+    # Igual que en obtener_periodos: la subconsulta traduce el nombre al id,
+    # y ORDER BY fecha los ordena de más antiguo a más reciente.
+    cursor.execute(
+        "SELECT fecha, sintoma FROM sintomas "
+        "WHERE usuario_id = (SELECT id FROM usuarios WHERE usuario = ?) "
+        "ORDER BY fecha",
+        (usuario,)                               # el valor del ? va en una tupla (con coma al final)
+    )
+    filas = cursor.fetchall()                    # lista de tuplas: [('2026-11-05', 'colicos'), ...]
+    conexion.close()
+    return creador_de_sintoma(filas)
+
+
+# Traduce las filas al formato que usarán las funciones de ciclos.py
+# De: ('2026-11-05', 'colicos')                             <- tupla con textos
+# A:  {"fecha": date(2026, 11, 5), "sintoma": "colicos"}    <- diccionario con la fecha de verdad
+# Una fila = un síntoma: si un día hay dos síntomas, salen dos diccionarios con la misma fecha.
+def creador_de_sintoma(filas) -> list:
+    sintomas = []                                # lista donde vamos guardando los diccionarios
+    for fila in filas:
+        sintoma = {
+            "fecha": date.fromisoformat(fila[0]),     # texto "año-mes-día" -> fecha de verdad
+            "sintoma": fila[1]                        # el nombre ya es texto: se queda igual
+        }
+        sintomas.append(sintoma)
+    return sintomas                              # la lista completa (no solo el último)

@@ -324,12 +324,11 @@ body {
     background-color: #FFF0F5;
 }
 
-/* Síntoma ya guardado hoy: principal.js le pone esta clase */
-.boton-sintoma.seleccionado {
-    border-color: #F06292;
+/* Efecto al pulsar un síntoma: se hunde un poco mientras se mantiene pulsado
+   (no se queda marcado: al soltar vuelve a su aspecto normal) */
+.boton-sintoma:active {
+    transform: scale(0.97);
     background-color: #FCE4EC;
-    color: #C2185B;
-    font-weight: 600;
 }
 
 /* Mensaje debajo de los síntomas ("Cólicos guardado", errores...) */
@@ -523,4 +522,26 @@ body {
     background-color: #F5F5F5;
     border: 1px solid #E0E0E0;
     color: #555;
+}
+
+/* Síntoma previsto para hoy: pastilla rosa (las grises normales siguen igual) */
+.pastilla-activa {
+    background-color: #FCE4EC;
+    border-color: #F8BBD0;
+    color: #C2185B;
+    font-weight: 600;
+}
+
+/* Texto gris en cursiva cuando no hay nada que enseñar ("Nada destacable para hoy") */
+.texto-vacio {
+    font-size: 13px;
+    color: #999;
+    font-style: italic;
+}
+
+/* La nota de debajo de los síntomas lleva el margen hacia abajo, no hacia arriba */
+.nota-abajo {
+    margin-top: 12px;
+    margin-bottom: 0;
+    line-height: 1.4;
 }

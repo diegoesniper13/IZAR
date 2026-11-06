@@ -23,3 +23,5 @@ __pycache__/
 # Archivos del sistema operativo
 .DS_Store
 Thumbs.db
+# Registro de seguridad (puede contener IPs y nombres de usuario)
+*.log

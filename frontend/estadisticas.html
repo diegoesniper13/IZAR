@@ -58,20 +58,21 @@
         <section class="tarjeta">
             <h3 class="titulo-seccion">HOY</h3>
 
-            <!-- El día del ciclo YA es real: estadisticas.js lo pide a /dashboard -->
+            <!-- El día del ciclo: estadisticas.js lo pide a /dashboard -->
             <div class="dato-grande">
                 <span id="dia-ciclo" class="numero">–</span>
                 <span class="etiqueta">día de tu ciclo</span>
             </div>
 
-            <!-- Posibles síntomas: por ahora de ejemplo, se conectará con el backend -->
-            <p class="subtitulo-tarjeta">Posibles síntomas</p>
-            <p class="nota">Datos de ejemplo</p>
+            <!-- Posibles síntomas: estadisticas.js rellena la lista con "sintomas_posibles"
+                 de /dashboard (función 5F de ciclos.py). -->
+            <p class="subtitulo-tarjeta">Es posible que hoy tengas</p>
             <div id="lista-sintomas" class="lista-sintomas">
-                <span class="pastilla">〰️ Cólicos</span>
-                <span class="pastilla">💤 Sueño</span>
-                <span class="pastilla">🙂 Ánimo</span>
+                <!-- Mientras carga solo se ve este texto; luego se sustituye -->
+                <span class="texto-vacio">Cargando...</span>
             </div>
+            <!-- Explica de dónde sale la predicción (o por qué todavía no hay) -->
+            <p id="explicacion-sintomas" class="nota nota-abajo"></p>
         </section>
 
         <!-- ===================== MENÚ INFERIOR =====================

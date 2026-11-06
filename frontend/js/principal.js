@@ -360,13 +360,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 const datos = await respuesta.json();
 
+                // Los botones son de un solo clic: no se quedan marcados.
+                // Lo único que cambia es el mensaje de debajo.
                 if (respuesta.ok) {
-                    // 201: guardado. Pintamos el botón para que se vea que ya está registrado.
-                    boton.classList.add("seleccionado");
+                    // 201: guardado
                     mensajeSintomas.textContent = `${nombreVisible}: guardado para hoy`;
                 } else if (respuesta.status === 409) {
-                    // 409: ya estaba guardado hoy. No es un fallo grave: lo marcamos igualmente.
-                    boton.classList.add("seleccionado");
+                    // 409: ya estaba guardado hoy. No es un fallo grave: solo lo avisamos.
                     mensajeSintomas.textContent = `${nombreVisible}: ya estaba registrado hoy`;
                 } else {
                     // Cualquier otro error: mostramos el mensaje que mandó app.py, en rojo
