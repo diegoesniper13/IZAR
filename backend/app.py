@@ -217,7 +217,8 @@ def dashboard():
             "dias_restantes": None,
             "periodo_abierto": False,            # sin periodos no puede haber ninguno abierto
             "mensaje": "Registra tu primer periodo",
-            "sintomas_posibles": []              # sin periodos no hay síntomas que prever
+            "sintomas_posibles": [],             # sin periodos no hay síntomas que prever
+            "ultimos_periodos": []               # ni periodos que enseñar
         })
 
     # 3B. CÁLCULOS con las funciones de ciclos.py
@@ -237,6 +238,16 @@ def dashboard():
     sintomas = bd.obtener_sintomas(usuario)
     sintomas_posibles = ciclos.calcular_sintomas_posibles(dia_actual, periodos, sintomas)
 
+    # Los 5 últimos periodos para la pantalla de Estadísticas (función 5G).
+    # Las fechas se pasan a texto con .isoformat() porque el JSON no entiende objetos date.
+    ultimos_periodos = []
+    for periodo in ciclos.obtener_ultimos_periodos(periodos, 5):
+        ultimos_periodos.append({
+            "inicio": periodo["inicio"].isoformat(),
+            "fin": periodo["fin"].isoformat() if periodo["fin"] is not None else None,
+            "duracion": periodo["duracion"]
+        })
+
     # 4. RESPUESTA CON DATOS
     return jsonify({
         "estado": "ok",
@@ -251,7 +262,9 @@ def dashboard():
         # la enseña al terminar un periodo y no deja elegir un fin anterior a ella.
         "inicio_ultimo": fecha_inicio_ultimo.isoformat(),
         # Ya es una lista de textos: el JSON la acepta tal cual (estadisticas.js la enseña)
-        "sintomas_posibles": sintomas_posibles
+        "sintomas_posibles": sintomas_posibles,
+        # Lista de hasta 5 periodos, del más reciente al más antiguo (estadisticas.js la pinta)
+        "ultimos_periodos": ultimos_periodos
     })
 
 

@@ -256,6 +256,32 @@ def calcular_sintomas_posibles(dia, periodos, sintomas) -> list:
 
     return posibles
 
+# FUNCIÓN 5G: los últimos periodos, listos para enseñarlos en Estadísticas
+# Recibe la lista de periodos (del más antiguo al más reciente) y cuántos queremos.
+# Devuelve los "cantidad" más recientes, del MÁS RECIENTE al más antiguo, así:
+#   [{"inicio": date(2026, 11, 4), "fin": date(2026, 11, 9), "duracion": 6}, ...]
+# Si un periodo sigue en curso, su "fin" y su "duracion" son None.
+def obtener_ultimos_periodos(periodos, cantidad=5) -> list:
+    ultimos = []
+
+    # periodos[-cantidad:] -> los últimos "cantidad" elementos de la lista (si hay menos, los que haya)
+    # reversed(...)        -> los recorre al revés, para que el más reciente salga primero
+    for periodo in reversed(periodos[-cantidad:]):
+        if periodo["fin"] is None:
+            duracion = None                     # sigue en curso: aún no sabemos cuánto dura
+        else:
+            # +1 porque se cuentan el primer y el último día (del 4 al 9 son 6 días de regla)
+            duracion = calcular_diferencia(periodo["inicio"], periodo["fin"]) + 1
+
+        ultimos.append({
+            "inicio": periodo["inicio"],
+            "fin": periodo["fin"],
+            "duracion": duracion
+        })
+
+    return ultimos
+
+
 # ---------------------------------------------------------------
 # VALIDACIONES  (todas devuelven True si se puede guardar y False si no)
 # ---------------------------------------------------------------

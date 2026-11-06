@@ -22,35 +22,14 @@
         </header>
 
         <!-- ===================== ÚLTIMOS PERIODOS (máximo 5) =====================
-             Por ahora son datos de EJEMPLO escritos a mano.
-             Cuando esté la ruta del backend, estadisticas.js borrará estas filas
-             y pondrá los 5 últimos periodos reales con la misma estructura. -->
+             estadisticas.js rellena la lista con "ultimos_periodos" de /dashboard
+             (función 5G de ciclos.py): una fila por periodo, del más reciente al más antiguo. -->
         <section class="tarjeta">
             <h3 class="titulo-seccion">ÚLTIMOS PERIODOS</h3>
-            <p class="nota">Datos de ejemplo</p>
 
             <ul id="lista-periodos" class="lista-periodos">
-                <!-- Una fila por periodo: fechas a la izquierda, duración a la derecha -->
-                <li class="fila-periodo">
-                    <span class="fechas-periodo"><span class="punto"></span>04/11 – 09/11</span>
-                    <span class="duracion">6 días</span>
-                </li>
-                <li class="fila-periodo">
-                    <span class="fechas-periodo"><span class="punto"></span>07/10 – 12/10</span>
-                    <span class="duracion">6 días</span>
-                </li>
-                <li class="fila-periodo">
-                    <span class="fechas-periodo"><span class="punto"></span>09/09 – 13/09</span>
-                    <span class="duracion">5 días</span>
-                </li>
-                <li class="fila-periodo">
-                    <span class="fechas-periodo"><span class="punto"></span>11/08 – 16/08</span>
-                    <span class="duracion">6 días</span>
-                </li>
-                <li class="fila-periodo">
-                    <span class="fechas-periodo"><span class="punto"></span>14/07 – 18/07</span>
-                    <span class="duracion">5 días</span>
-                </li>
+                <!-- Mientras carga solo se ve este texto; luego se sustituye por las filas -->
+                <li class="texto-vacio">Cargando...</li>
             </ul>
         </section>
 

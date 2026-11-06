@@ -3,7 +3,8 @@
 //   - comprueba que hay sesión (si no, manda a login.html)
 //   - pone el día del ciclo de hoy
 //   - enseña los síntomas que es posible que tenga hoy (función 5F de ciclos.py)
-// La caja de "Últimos periodos" sigue siendo de ejemplo hasta que exista su ruta en el backend.
+//   - enseña sus 5 últimos periodos (función 5G de ciclos.py)
+// Todo sale de la misma ruta: /dashboard.
 
 // Cómo se enseña cada síntoma. Las claves son los nombres que guarda la base de datos
 // (SINTOMAS_VALIDOS de ciclos.py); los valores, lo que ve la usuaria.
@@ -20,6 +21,65 @@ document.addEventListener("DOMContentLoaded", async () => {
     const numeroDiaCiclo = document.querySelector("#dia-ciclo");
     const listaSintomas = document.querySelector("#lista-sintomas");
     const explicacion = document.querySelector("#explicacion-sintomas");
+    const listaPeriodos = document.querySelector("#lista-periodos");
+
+
+    // ---------------------------------------------------------------
+    // FUNCIÓN: convierte "2026-11-04" en "04/11" (día/mes, que es lo que cabe en la fila)
+    // ---------------------------------------------------------------
+    function diaYMes(texto) {
+        const partes = texto.split("-");            // ["2026", "11", "04"]
+        return `${partes[2]}/${partes[1]}`;
+    }
+
+
+    // ---------------------------------------------------------------
+    // FUNCIÓN: pinta la lista de últimos periodos
+    // ---------------------------------------------------------------
+    // Recibe la lista que manda el servidor, por ejemplo:
+    //   [{inicio: "2026-11-04", fin: "2026-11-09", duracion: 6}, {inicio: "...", fin: null, duracion: null}]
+    // Usamos createElement + textContent (y no innerHTML con los datos) para que
+    // ningún texto pueda colarse como código HTML: es parte de la protección contra XSS.
+    function mostrarPeriodos(periodos) {
+        listaPeriodos.innerHTML = "";               // quitamos el "Cargando..."
+
+        if (periodos.length === 0) {
+            const vacio = document.createElement("li");
+            vacio.className = "texto-vacio";
+            vacio.textContent = "Todavía no has registrado ningún periodo";
+            listaPeriodos.appendChild(vacio);
+            return;
+        }
+
+        periodos.forEach((periodo) => {
+            // <li class="fila-periodo">
+            const fila = document.createElement("li");
+            fila.className = "fila-periodo";
+
+            //   <span class="fechas-periodo"><span class="punto"></span>04/11 – 09/11</span>
+            const fechas = document.createElement("span");
+            fechas.className = "fechas-periodo";
+            const punto = document.createElement("span");
+            punto.className = "punto";
+            fechas.appendChild(punto);
+            // Si sigue en curso no hay fin: ponemos "ahora"
+            const textoFin = periodo.fin ? diaYMes(periodo.fin) : "ahora";
+            fechas.append(`${diaYMes(periodo.inicio)} – ${textoFin}`);
+
+            //   <span class="duracion">6 días</span>   (o "En curso")
+            const duracion = document.createElement("span");
+            duracion.className = "duracion";
+            if (periodo.duracion === null) {
+                duracion.textContent = "En curso";
+            } else {
+                duracion.textContent = `${periodo.duracion} ${periodo.duracion === 1 ? "día" : "días"}`;
+            }
+
+            fila.appendChild(fechas);
+            fila.appendChild(duracion);
+            listaPeriodos.appendChild(fila);
+        });
+    }
 
 
     // ---------------------------------------------------------------
@@ -71,8 +131,12 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (datos.estado === "nuevo") {
             mostrarTextoVacio("Registra tu primer periodo para empezar");
             explicacion.textContent = "";
+            mostrarPeriodos([]);
             return;
         }
+
+        // ÚLTIMOS PERIODOS
+        mostrarPeriodos(datos.ultimos_periodos);
 
         // DÍA DEL CICLO
         numeroDiaCiclo.textContent = datos.dia_ciclo;
@@ -93,5 +157,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         // Servidor apagado o fallo de conexión
         console.error("Error de conexión:", error);
         mostrarTextoVacio("No se pudo conectar con el servidor");
+        listaPeriodos.innerHTML = "";
     }
 });
