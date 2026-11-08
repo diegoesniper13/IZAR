@@ -316,7 +316,10 @@ document.addEventListener("DOMContentLoaded", () => {
     // ---------------------------------------------------------------
     // BOTONES DE SÍNTOMAS: guardan el síntoma con la fecha de hoy
     // ---------------------------------------------------------------
-    const botonesSintoma = document.querySelectorAll(".boton-sintoma");
+    // Solo los botones que tienen data-sintoma (los 4 síntomas). El botón "Borrar hoy"
+    // también usa la clase boton-sintoma para verse igual, pero no tiene data-sintoma,
+    // así que este selector lo deja fuera.
+    const botonesSintoma = document.querySelectorAll(".boton-sintoma[data-sintoma]");
     const mensajeSintomas = document.querySelector("#mensaje-sintomas");
 
     // forEach recorre la lista de botones y le pone a CADA uno el mismo "escuchador" de clic
@@ -382,6 +385,62 @@ document.addEventListener("DOMContentLoaded", () => {
 
             boton.disabled = false;                  // volvemos a activar el botón
         });
+    });
+
+
+    // ---------------------------------------------------------------
+    // BOTÓN "BORRAR HOY": borra todos los síntomas registrados hoy
+    // ---------------------------------------------------------------
+    const botonBorrar = document.querySelector("#borrar-sintomas");
+
+    botonBorrar.addEventListener("click", async () => {
+        // Pedimos confirmación antes de borrar: borrar no se puede deshacer.
+        // confirm() enseña una ventanita del navegador con "Aceptar" y "Cancelar".
+        if (!confirm("¿Borrar todos los síntomas que has registrado hoy?")) {
+            return;                                  // ha pulsado Cancelar: no hacemos nada
+        }
+
+        mensajeSintomas.textContent = "";
+        mensajeSintomas.classList.remove("error");
+        botonBorrar.disabled = true;                 // evita dos clics seguidos mientras esperamos
+
+        try {
+            // Enviamos {"fecha": "2026-11-08"} a la ruta 8 de app.py
+            const respuesta = await fetch("/sintoma/borrar", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ fecha: fechaDeHoy() })
+            });
+
+            if (respuesta.status === 401) {          // la sesión ha caducado
+                window.location.href = "login.html";
+                return;
+            }
+
+            const datos = await respuesta.json();
+
+            if (respuesta.ok) {
+                // El servidor dice cuántos ha borrado: elegimos el mensaje según el número
+                if (datos.borrados === 0) {
+                    mensajeSintomas.textContent = "No había síntomas registrados hoy";
+                } else if (datos.borrados === 1) {
+                    mensajeSintomas.textContent = "Se ha borrado 1 síntoma de hoy";
+                } else {
+                    mensajeSintomas.textContent = `Se han borrado ${datos.borrados} síntomas de hoy`;
+                }
+            } else {
+                // Cualquier error: mostramos el mensaje que mandó app.py, en rojo
+                mensajeSintomas.textContent = datos.error;
+                mensajeSintomas.classList.add("error");
+            }
+
+        } catch (error) {
+            console.error("Error de conexión:", error);
+            mensajeSintomas.textContent = "No se pudo conectar con el servidor";
+            mensajeSintomas.classList.add("error");
+        }
+
+        botonBorrar.disabled = false;                // volvemos a activar el botón
     });
 
 

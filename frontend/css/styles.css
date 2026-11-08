@@ -324,6 +324,33 @@ body {
     background-color: #FFF0F5;
 }
 
+/* Cabecera de la caja de síntomas (título + botón "Borrar hoy").
+   Usa la clase "cabecera-app" para ponerlos a cada lado; aquí solo ajustamos
+   los márgenes para que título y botón queden a la misma altura. */
+.caja-sintomas .cabecera-app {
+    margin-bottom: 15px;            /* la cabecera de arriba usa 25px: aquí, menos */
+}
+
+.caja-sintomas .cabecera-app .titulo-seccion {
+    margin-bottom: 0;               /* sin margen abajo, el título se centra con el botón */
+}
+
+/* Botón "Borrar hoy": más pequeño y discreto que los de síntomas,
+   para que no se pulse sin querer ni parezca un síntoma más */
+#borrar-sintomas {
+    padding: 6px 10px;
+    font-size: 12px;
+    gap: 6px;
+    color: #888;
+}
+
+/* Al pasar el ratón se pone rojo: avisa de que borra cosas */
+#borrar-sintomas:hover {
+    color: #D32F2F;
+    border-color: #D32F2F;
+    background-color: #FFEBEE;
+}
+
 /* Efecto al pulsar un síntoma: se hunde un poco mientras se mantiene pulsado
    (no se queda marcado: al soltar vuelve a su aspecto normal) */
 .boton-sintoma:active {

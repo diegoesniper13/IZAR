@@ -408,6 +408,40 @@ def nuevo_sintoma():
     return jsonify({"guardado": True}), 201
 
 
+# ---------------------------------------------------------------
+# RUTA 8: POST /sintoma/borrar  ->  borra TODOS los síntomas de un día
+# ---------------------------------------------------------------
+# El cliente envía: {"fecha": "2026-11-08"}
+# La fecha la manda el navegador (como en las otras rutas) para usar el día de España,
+# no el del servidor, que puede estar en otra zona horaria.
+# Responde con cuántos síntomas se han borrado: {"borrados": 3}. Si no había ninguno,
+# responde {"borrados": 0}: no es un error, el JavaScript decide qué mensaje enseñar.
+@app.route("/sintoma/borrar", methods=["POST"])
+def sintoma_borrar():
+    # 1. SEGURIDAD: la usuaria SIEMPRE sale de la sesión, nunca del JSON.
+    # Así nadie puede borrar los síntomas de otra persona.
+    usuario = session.get("usuario")
+    if not usuario:
+        return jsonify({"error": "No autorizado. Inicia sesión antes"}), 401
+
+    # 2. LEER DATOS: solo hace falta la fecha (se borran todos los síntomas de ese día)
+    datos = request.get_json(silent=True)
+    try:
+        fecha = date.fromisoformat(datos["fecha"])     # texto "2026-11-08" -> fecha de verdad
+    except (KeyError, TypeError, ValueError):          # falta la clave, no hay JSON o la fecha no existe
+        return jsonify({"error": "Faltan datos"}), 400
+
+    # 3. VALIDAR: la fecha no puede ser futura (reutilizamos la validación del inicio de periodo)
+    if not ciclos.validar_inicio_nuevo_periodo(fecha):
+        return jsonify({"error": "La fecha no puede ser futura"}), 400
+
+    # 4. BORRAR. La fecha va como texto con .isoformat(), igual que al guardarlos.
+    # eliminar_sintomas devuelve CUÁNTOS ha borrado (0 si ese día no había ninguno).
+    borrados = bd.eliminar_sintomas(usuario, fecha.isoformat())
+
+    # 5. RESPONDER: 200 = "todo bien" (no hemos creado nada, por eso no es 201)
+    return jsonify({"borrados": borrados}), 200
+
 
 # ---------------------------------------------------------------
 # ARRANQUE DEL SERVIDOR

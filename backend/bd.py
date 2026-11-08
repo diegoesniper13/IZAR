@@ -174,6 +174,7 @@ def guardar_sintoma(usuario, fecha, sintoma) -> bool:
     conexion.close()
     return True
 
+
 # Devuelve TODOS los síntomas de una usuaria, del más antiguo al más reciente.
 # "usuario" es el nombre de usuario que está guardado en la sesión.
 # Si no tiene ninguno, devuelve una lista vacía [].
@@ -206,3 +207,30 @@ def creador_de_sintoma(filas) -> list:
         }
         sintomas.append(sintoma)
     return sintomas                              # la lista completa (no solo el último)
+
+
+# Borra TODOS los síntomas de una usuaria en un día concreto (el botón "Borrar hoy").
+# "fecha" llega como texto, por ejemplo "2026-11-08". La decide la ruta de app.py
+# (así esta función sirve para cualquier día, no solo para hoy).
+# Devuelve cuántos síntomas se han borrado: 0 si ese día no tenía ninguno.
+def eliminar_sintomas(usuario, fecha) -> int:
+    conexion = sqlite3.connect(RUTA_BD)
+    cursor = conexion.cursor()
+    # DELETE borra las filas que cumplan el WHERE. Tienen que cumplirse LAS DOS condiciones:
+    #   - que sean de esta usuaria (la subconsulta traduce el nombre al id), para no borrar
+    #     nunca los síntomas de otra persona
+    #   - que sean de esa fecha
+    # OJO: un DELETE sin WHERE borraría la tabla entera. Por eso las condiciones son tan importantes.
+    # Los ? se rellenan por orden: usuario y fecha.
+    cursor.execute(
+        "DELETE FROM sintomas "
+        "WHERE usuario_id = (SELECT id FROM usuarios WHERE usuario = ?) "
+        "AND fecha = ?",
+        (usuario, fecha)
+    )
+    conexion.commit()                            # sin commit no se borra nada del archivo
+    # rowcount = cuántas filas ha borrado el DELETE (como en final_periodo con el UPDATE).
+    # Un DELETE que no encuentra nada no da error: simplemente devuelve 0.
+    borrados = cursor.rowcount
+    conexion.close()
+    return borrados

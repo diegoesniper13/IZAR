@@ -50,7 +50,15 @@
 
         <!-- ===================== SÍNTOMAS (cuadrícula 2x2) ===================== -->
         <section class="caja-sintomas">
-            <h3 class="titulo-seccion">REGISTRO RÁPIDO DE HOY</h3>
+            <!-- Cabecera de la caja: título a la izquierda y botón de borrar a la derecha.
+                 Reutiliza la clase "cabecera-app" (la de arriba del todo), que ya pone
+                 un elemento a cada lado (display: flex + space-between). -->
+            <div class="cabecera-app">
+                <h3 class="titulo-seccion">REGISTRO RÁPIDO DE HOY</h3>
+                <!-- Borra los síntomas registrados hoy.
+                     De momento NO hace nada: falta conectarlo en principal.js y crear la ruta en app.py. -->
+                <button id="borrar-sintomas" class="boton-sintoma" type="button"><span>🗑️</span> Borrar hoy</button>
+            </div>
             <!-- data-sintoma guarda el nombre que se envía al servidor. Tiene que coincidir
                  con SINTOMAS_VALIDOS de ciclos.py (minúsculas y sin tildes).
                  El texto que se ve puede llevar tildes: eso es solo para la usuaria. -->
