@@ -1,5 +1,5 @@
-/* Inter para todo el texto; Quicksand (redondeada) solo para el nombre "IZAR" */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Quicksand:wght@500;600;700&display=swap');
+/* Inter para todo el texto; Playfair Display en cursiva solo para el nombre "IZAR" */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@1,600;1,700&display=swap');
 
 * {
     margin: 0;
@@ -58,10 +58,11 @@ body {
 }
 
 .nombre {
-    font-family: 'Quicksand', 'Inter', sans-serif;   /* fuente bonita y redondeada solo para el logo */
+    font-family: 'Playfair Display', 'Inter', serif;   /* fuente elegante en cursiva, solo para el logo */
+    font-style: italic;         /* la letra inclinada que pedías */
     font-size: 24px;
     font-weight: 700;
-    letter-spacing: 1px;        /* un poco de aire entre letras, queda más elegante */
+    letter-spacing: 0.5px;      /* un poco de aire entre letras, queda más elegante */
     color: #222;
 }
 
@@ -632,4 +633,107 @@ body {
 
 .texto-legal li {
     margin-bottom: 6px;
+}
+
+/* =========================================
+   ICONO DE AJUSTES (engranaje de la cabecera)
+   ========================================= */
+.icono-ajustes {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+.icono-ajustes svg {
+    width: 24px;
+    height: 24px;
+    fill: #888;                    /* gris: no distrae del contenido */
+    transition: fill 0.2s;
+}
+.icono-ajustes:hover {
+    background-color: #FFF0F5;     /* rosa muy suave al pasar el ratón */
+}
+.icono-ajustes:hover svg {
+    fill: #F06292;                 /* el engranaje se pone rosa */
+}
+/* En la propia página de ajustes el engranaje no es un enlace, solo decora */
+.icono-ajustes-estatico {
+    cursor: default;
+}
+
+/* =========================================
+   PÁGINA DE AJUSTES
+   ========================================= */
+.titulo-ajustes {
+    font-size: 22px;
+    font-weight: 700;
+    color: #111;
+    margin-bottom: 18px;
+}
+
+/* Una línea "Etiqueta ............ valor" (por ejemplo: Usuario -> ana) */
+.dato-ajuste {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14px;
+}
+.etiqueta-dato {
+    color: #666;
+}
+.valor-dato {
+    font-weight: 600;
+    color: #222;
+}
+
+/* Enlaces de la caja "Legal": uno debajo de otro, con una rayita de separación */
+.enlace-ajuste {
+    display: block;
+    padding: 12px 0;
+    color: #333;
+    text-decoration: none;
+    font-size: 14px;
+    border-bottom: 1px solid #F0F0F0;
+}
+.enlace-ajuste:last-child {
+    border-bottom: none;
+}
+.enlace-ajuste:hover {
+    color: #F06292;
+}
+
+/* Mensajes de resultado bajo los botones (guardado / error) */
+.mensaje-ajuste {
+    text-align: center;
+    font-size: 13px;
+    color: #666;
+    min-height: 18px;
+    margin-top: 10px;
+}
+.mensaje-ajuste.error {
+    color: #D32F2F;
+}
+
+/* --- Zona de peligro (eliminar cuenta) --- */
+.tarjeta-peligro {
+    border-color: #F5C6CB;         /* borde rojizo suave para avisar */
+}
+.texto-peligro {
+    font-size: 13px;
+    color: #777;
+    margin-bottom: 14px;
+    line-height: 1.5;
+}
+.boton-peligro {
+    background-color: #fff;
+    color: #D32F2F;
+    border: 2px solid #D32F2F;
+}
+.boton-peligro:hover {
+    background-color: #D32F2F;
+    color: #fff;
 }

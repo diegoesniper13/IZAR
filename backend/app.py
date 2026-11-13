@@ -221,6 +221,7 @@ def dashboard():
     # 3A. RESPUESTA PARA USUARIA NUEVA: sin periodos no hay nada que calcular
     if len(periodos) == 0:
         return jsonify({
+            "usuario":usuario,
             "estado": "nuevo",
             "dia_ciclo": 0,
             "dias_restantes": None,
@@ -259,6 +260,7 @@ def dashboard():
 
     # 4. RESPUESTA CON DATOS
     return jsonify({
+        "usuario":usuario,
         "estado": "ok",
         "dia_ciclo": dia_actual,
         "dias_restantes": dias_restantes,
@@ -451,6 +453,62 @@ def sintoma_borrar():
     # 5. RESPONDER: 200 = "todo bien" (no hemos creado nada, por eso no es 201)
     return jsonify({"borrados": borrados}), 200
 
+
+# ---------------------------------------------------------------
+# RUTA 9: POST /cuenta/contrasena  ->  cambia la contraseña de la usuaria logueada
+# ---------------------------------------------------------------
+# El cliente envía: {"actual": "...", "nueva": "..."}
+# Responde 200 si se cambió, o un error (400/401) con {"error": "..."}
+@app.route("/cuenta/contrasena", methods=["POST"])
+def cambiar_contrasena():
+    # 1. SEGURIDAD: la usuaria SIEMPRE sale de la sesión, nunca del JSON.
+    # Así nadie puede cambiar la contraseña de otra cuenta.
+    usuario = session.get("usuario")
+    if not usuario:
+        return jsonify({"error":"inicia sesion antes"}),401
+
+    # 2. LEER DATOS: hacen falta las dos, la actual (para comprobarla) y la nueva (para guardarla)
+    datos = request.get_json(silent=True)
+    try:
+        actual = datos["actual"]
+        nueva = datos["nueva"]
+    except (KeyError,TypeError):
+        return jsonify({"error":"faltan datos"}),400
+
+    # 3. VALIDAR: la nueva tiene que tener un mínimo de caracteres (igual que en el registro)
+    if len(nueva) < 8:
+        return jsonify({"error":"contraseña menor de 8 caracteres"}),400
+
+    # 4. COMPROBAR LA ACTUAL: reutilizamos iniciar_sesion, que compara una contraseña con el hash
+    # guardado. Si no coincide, no se cambia nada.
+    if not bd.iniciar_sesion(usuario,actual):
+        return jsonify({"error":"contraseña incorrecta"}),400
+
+    # 5. GUARDAR LA NUEVA: cambiar_contraseña calcula su hash y actualiza la base de datos
+    bd.cambiar_contraseña(nueva,usuario)
+
+    return jsonify({"true":True}),200
+
+
+# ---------------------------------------------------------------
+# RUTA 10: POST /cuenta/borrar  ->  borra la cuenta de la usuaria logueada y todos sus datos
+# ---------------------------------------------------------------
+# No necesita leer nada del cuerpo de la petición: la usuaria a borrar es siempre
+# la que tiene la sesión abierta, nunca una que mande el cliente en el JSON.
+@app.route("/cuenta/borrar", methods=["POST"])
+def borrar_cuenta():
+    # 1. SEGURIDAD: igual que en el resto de rutas, la usuaria sale de la sesión
+    usuario = session.get("usuario")
+    if not usuario:
+        return jsonify({"error":"inicia sesion antes"}),401
+
+    # 2. BORRAR: eliminar_cuenta se encarga de quitar periodos, síntomas y la propia cuenta
+    bd.eliminar_cuenta(usuario)
+
+    # 3. CERRAR LA SESIÓN: la cuenta ya no existe, así que no puede quedar "logueada"
+    session.clear()
+
+    return jsonify({"true":True}),200
 
 # ---------------------------------------------------------------
 # ARRANQUE DEL SERVIDOR

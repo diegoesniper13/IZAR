@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ajustes - IZAR</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <main class="caja aplicacion">
+
+        <!-- ===================== CABECERA ===================== -->
+        <header class="cabecera-app">
+            <div class="marca">
+                <svg class="estrella" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                </svg>
+                <span class="nombre">IZAR</span>
+            </div>
+            <!-- En ajustes, el engranaje se queda (ya estás aquí): solo decora -->
+            <span class="icono-ajustes icono-ajustes-estatico" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M19.4 13c.04-.33.06-.66.06-1s-.02-.67-.06-1l2.11-1.65a.5.5 0 0 0 .12-.64l-2-3.46a.5.5 0 0 0-.61-.22l-2.49 1a7.3 7.3 0 0 0-1.73-1l-.38-2.65A.5.5 0 0 0 14 1h-4a.5.5 0 0 0-.49.42l-.38 2.65c-.62.25-1.2.59-1.73 1l-2.49-1a.5.5 0 0 0-.61.22l-2 3.46a.5.5 0 0 0 .12.64L4.6 11c-.04.33-.06.66-.06 1s.02.67.06 1l-2.11 1.65a.5.5 0 0 0-.12.64l2 3.46c.14.24.44.32.68.22l2.49-1c.53.41 1.11.75 1.73 1l.38 2.65c.04.24.25.42.49.42h4c.24 0 .45-.18.49-.42l.38-2.65c.62-.25 1.2-.59 1.73-1l2.49 1c.24.1.54.02.68-.22l2-3.46a.5.5 0 0 0-.12-.64L19.4 13zM12 15.5A3.5 3.5 0 1 1 12 8.5a3.5 3.5 0 0 1 0 7z"/></svg>
+            </span>
+        </header>
+
+        <h1 class="titulo-ajustes">Ajustes</h1>
+
+        <!-- ===================== CUENTA ===================== -->
+        <section class="tarjeta">
+            <h3 class="titulo-seccion">TU CUENTA</h3>
+            <!-- ajustes.js rellena el nombre de usuario (pídelo a /dashboard o a una ruta propia) -->
+            <p class="dato-ajuste">
+                <span class="etiqueta-dato">Usuario</span>
+                <span id="nombre-usuario" class="valor-dato">—</span>
+            </p>
+        </section>
+
+        <!-- ===================== CAMBIAR CONTRASEÑA ===================== -->
+        <!-- Los campos están listos; falta la ruta en app.py (por ejemplo POST /cuenta/contrasena)
+             y el clic en ajustes.js que la llame. -->
+        <section class="tarjeta">
+            <h3 class="titulo-seccion">CAMBIAR CONTRASEÑA</h3>
+            <div class="campo">
+                <label for="contrasena-actual">Contraseña actual</label>
+                <input type="password" id="contrasena-actual" autocomplete="current-password">
+            </div>
+            <div class="campo">
+                <label for="contrasena-nueva">Contraseña nueva</label>
+                <input type="password" id="contrasena-nueva" autocomplete="new-password">
+                <p class="ayuda">Mínimo 8 caracteres.</p>
+            </div>
+            <button id="guardar-contrasena" class="boton boton-principal">Guardar contraseña</button>
+            <!-- ajustes.js escribe aquí si salió bien o el error -->
+            <p id="mensaje-contrasena" class="mensaje-ajuste"></p>
+        </section>
+
+        <!-- ===================== LEGAL ===================== -->
+        <!-- Estos dos enlaces YA funcionan: abren las páginas que hicimos -->
+        <section class="tarjeta">
+            <h3 class="titulo-seccion">LEGAL</h3>
+            <a href="terminos.html" class="enlace-ajuste">Términos y condiciones</a>
+            <a href="privacidad.html" class="enlace-ajuste">Política de privacidad</a>
+        </section>
+
+        <!-- ===================== SESIÓN ===================== -->
+        <!-- Al pulsar, ajustes.js debe llamar a POST /logout y luego llevar a login.html -->
+        <section class="tarjeta">
+            <button id="cerrar-sesion" class="boton boton-secundario">Cerrar sesión</button>
+        </section>
+
+        <!-- ===================== ZONA DE PELIGRO ===================== -->
+        <!-- Borrar la cuenta y TODOS sus datos. Falta la ruta en app.py (por ejemplo
+             POST /cuenta/borrar) y que ajustes.js pida confirmación antes de llamarla. -->
+        <section class="tarjeta tarjeta-peligro">
+            <h3 class="titulo-seccion">ELIMINAR CUENTA</h3>
+            <p class="texto-peligro">
+                Se borrarán tu cuenta, tus periodos y tus síntomas. Esta acción no se puede deshacer.
+            </p>
+            <button id="borrar-cuenta" class="boton boton-peligro">Eliminar mi cuenta</button>
+            <p id="mensaje-cuenta" class="mensaje-ajuste"></p>
+        </section>
+
+        <!-- ===================== MENÚ INFERIOR ===================== -->
+        <!-- A ajustes se entra por el engranaje de arriba, así que aquí ningún botón va "activo" -->
+        <nav class="navegacion-inferior">
+            <a href="principal.html" class="nav-item"><span>📝</span> Registro</a>
+            <a href="estadisticas.html" class="nav-item"><span>📊</span> Estadísticas</a>
+        </nav>
+
+    </main>
+
+    <script src="js/ajustes.js"></script>
+</body>
+</html>

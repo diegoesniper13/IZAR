@@ -18,6 +18,7 @@ RUTA_BD = os.path.join(os.path.dirname(os.path.abspath(__file__)), "regla.db")
 # Devuelve los periodos de UNA usuaria, del más antiguo al más reciente.
 # "usuario" es el nombre de usuario que está guardado en la sesión.
 def obtener_periodos(usuario) -> list:
+    """Devuelve la lista de periodos de una usuaria, del más antiguo al más reciente."""
     conexion = sqlite3.connect(RUTA_BD)          # abre el archivo de la base de datos
     cursor = conexion.cursor()                   # el "mando" para enviar órdenes SQL
     # La tabla periodos guarda el id numérico de la usuaria (usuario_id), pero la sesión
@@ -43,6 +44,7 @@ def obtener_periodos(usuario) -> list:
 # De: ('2026-01-01', '2026-01-06')                         <- tupla con textos
 # A:  {"inicio": date(2026,1,1), "fin": date(2026,1,6)}    <- diccionario con fechas
 def creador_de_fecha_periodo(filas) -> list:
+    """Convierte filas de la base de datos (textos) en diccionarios con fechas de verdad."""
     periodos = []
     for fila in filas:
         periodo = {
@@ -61,6 +63,7 @@ def creador_de_fecha_periodo(filas) -> list:
 # Devuelve True si se guardó, y False si esa usuaria no existe.
 # fin=None: si no se pasa el fin, se guarda vacío (periodo en curso).
 def guardar_periodo(usuario, inicio, fin=None) -> bool:
+    """Guarda un periodo nuevo (con o sin fecha de fin) a nombre de una usuaria."""
     conexion = sqlite3.connect(RUTA_BD)
     cursor = conexion.cursor()
     try:
@@ -82,6 +85,7 @@ def guardar_periodo(usuario, inicio, fin=None) -> bool:
 # Pone la fecha de fin al periodo que está abierto (fin vacío) de una usuaria.
 # Devuelve True si se actualizó un periodo, y False si no había ninguno abierto.
 def final_periodo(usuario, inicio, fin) -> bool:
+    """Cierra el periodo abierto de una usuaria, poniéndole la fecha de fin."""
     conexion = sqlite3.connect(RUTA_BD)
     cursor = conexion.cursor()
     try:
@@ -117,6 +121,7 @@ def final_periodo(usuario, inicio, fin) -> bool:
 
 # Crea una cuenta nueva. Devuelve True si se creó, y False si ese usuario ya existe.
 def crear_usuario(usuario, nombre, contrasena) -> bool:
+    """Crea una cuenta nueva, guardando el hash de la contraseña (nunca la contraseña tal cual)."""
     conexion = sqlite3.connect(RUTA_BD)
     cursor = conexion.cursor()
     hash_contrasena = generate_password_hash(contrasena)      # la contraseña nunca se guarda tal cual
@@ -132,9 +137,59 @@ def crear_usuario(usuario, nombre, contrasena) -> bool:
     conexion.close()
     return True
 
+# Cambia la contraseña de una usuaria. Devuelve True si se cambió, y False si esa usuaria no existe.
+# "contrasena" llega en texto plano (lo que escribe en el formulario): aquí mismo se calcula
+# su hash antes de guardarla, igual que en crear_usuario. La contraseña nunca se guarda tal cual.
+def cambiar_contraseña(contrasena,usuario)->bool:
+    """Cambia la contraseña de una usuaria, guardando el hash de la nueva."""
+    conexion = sqlite3.connect(RUTA_BD)
+    cursor = conexion.cursor()
+    hash_contrasena = generate_password_hash(contrasena)      # la nueva contraseña, ya convertida a hash
+    # UPDATE sobre la fila de esa usuaria: cambia solo contrasena_hash, nada más.
+    cursor.execute("UPDATE usuarios SET contrasena_hash = ? WHERE usuario = ?",
+                   (hash_contrasena,usuario))
+    conexion.commit()                             # sin commit el cambio NO se guarda
+    # rowcount = cuántas filas ha cambiado el UPDATE. 0 significa que esa usuaria no existe.
+    filas_cambiadas = cursor.rowcount
+    conexion.close()
+    if filas_cambiadas == 0:
+        return False
+
+    return True
+
+
+# Borra la cuenta de una usuaria y TODOS sus datos. Devuelve True si se borró,
+# y False si esa usuaria no existía.
+# Importante el ORDEN: primero periodos y síntomas (que dependen del id de la usuaria),
+# y solo al final la propia fila de usuarios. Si se borrara usuarios primero, la subconsulta
+# (SELECT id FROM usuarios WHERE usuario = ?) ya no encontraría a nadie y no se podría
+# borrar lo demás.
+def eliminar_cuenta(usuario)->bool:
+    """Borra la cuenta de una usuaria y todos sus datos (periodos y síntomas)."""
+    conexion = sqlite3.connect(RUTA_BD)
+    cursor = conexion.cursor()
+    # 1. Primero los periodos de esa usuaria (la subconsulta traduce el nombre a su id)
+    cursor.execute("DELETE FROM periodos WHERE usuario_id = (SELECT id FROM usuarios WHERE usuario = ?)",
+                   (usuario,))
+    # 2. Después sus síntomas
+    cursor.execute("DELETE FROM sintomas WHERE usuario_id = (SELECT id FROM usuarios WHERE usuario = ?)",
+                   (usuario,))
+    # 3. Por último, la propia cuenta
+    cursor.execute("DELETE FROM usuarios WHERE usuario = ?",
+                     (usuario,))
+    conexion.commit()                             # sin commit no se borra nada del archivo
+    # rowcount aquí solo refleja el ÚLTIMO execute (el de usuarios), que es justo
+    # el que nos interesa: si fue 0, esa usuaria no existía.
+    filas_cambiadas = cursor.rowcount
+    conexion.close()
+    if filas_cambiadas == 0:
+        return False
+    return True
+
 
 # Comprueba usuario y contraseña. Devuelve True si son correctos.
 def iniciar_sesion(usuario, contrasena) -> bool:
+    """Comprueba si el usuario existe y si la contraseña coincide con su hash guardado."""
     conexion = sqlite3.connect(RUTA_BD)
     cursor = conexion.cursor()
     cursor.execute("SELECT contrasena_hash FROM usuarios WHERE usuario = ?", (usuario,))
@@ -157,6 +212,7 @@ def iniciar_sesion(usuario, contrasena) -> bool:
 #   - la usuaria no existe (la subconsulta da "nada" y usuario_id es obligatorio).
 # En los dos casos SQLite da IntegrityError.
 def guardar_sintoma(usuario, fecha, sintoma) -> bool:
+    """Guarda un síntoma de una usuaria en un día concreto."""
     conexion = sqlite3.connect(RUTA_BD)
     cursor = conexion.cursor()
     try:
@@ -177,6 +233,7 @@ def guardar_sintoma(usuario, fecha, sintoma) -> bool:
 # La fecha la pone la propia función (date.today()), así quien la llama no se preocupa de ella.
 # Devuelve True si se actualizó una fila, y False si esa usuaria no existe (rowcount == 0).
 def guardar_terminos(usuario) -> bool:
+    """Marca que una usuaria ha aceptado los términos y la privacidad, con la fecha de hoy."""
     conexion = sqlite3.connect(RUTA_BD)
     cursor = conexion.cursor()
     # UPDATE: rellena la columna acepto_terminos de ESA usuaria con la fecha de hoy.
@@ -195,6 +252,7 @@ def guardar_terminos(usuario) -> bool:
 # "usuario" es el nombre de usuario que está guardado en la sesión.
 # Si no tiene ninguno, devuelve una lista vacía [].
 def obtener_sintomas(usuario) -> list:
+    """Devuelve todos los síntomas de una usuaria, del más antiguo al más reciente."""
     conexion = sqlite3.connect(RUTA_BD)
     cursor = conexion.cursor()
     # Igual que en obtener_periodos: la subconsulta traduce el nombre al id,
@@ -215,6 +273,7 @@ def obtener_sintomas(usuario) -> list:
 # A:  {"fecha": date(2026, 11, 5), "sintoma": "colicos"}    <- diccionario con la fecha de verdad
 # Una fila = un síntoma: si un día hay dos síntomas, salen dos diccionarios con la misma fecha.
 def creador_de_sintoma(filas) -> list:
+    """Convierte filas de síntomas (textos) en diccionarios con la fecha de verdad."""
     sintomas = []                                # lista donde vamos guardando los diccionarios
     for fila in filas:
         sintoma = {
@@ -230,6 +289,7 @@ def creador_de_sintoma(filas) -> list:
 # (así esta función sirve para cualquier día, no solo para hoy).
 # Devuelve cuántos síntomas se han borrado: 0 si ese día no tenía ninguno.
 def eliminar_sintomas(usuario, fecha) -> int:
+    """Borra todos los síntomas de una usuaria en un día concreto y dice cuántos ha borrado."""
     conexion = sqlite3.connect(RUTA_BD)
     cursor = conexion.cursor()
     # DELETE borra las filas que cumplan el WHERE. Tienen que cumplirse LAS DOS condiciones:

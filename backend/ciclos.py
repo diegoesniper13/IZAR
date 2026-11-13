@@ -14,6 +14,7 @@ from datetime import date, timedelta
 # Recibe dos fechas (date) y devuelve un número entero.
 # Ojo: si "fin" es ANTERIOR a "inicio", el resultado sale negativo (por ejemplo -28).
 def calcular_diferencia(inicio, fin) -> int:
+    """Devuelve cuántos días hay entre dos fechas (negativo si fin es anterior a inicio)."""
     resultado = fin - inicio            # restar dos fechas da un timedelta (una cantidad de tiempo)
     return resultado.days               # .days saca solo el número de días
 
@@ -21,6 +22,7 @@ def calcular_diferencia(inicio, fin) -> int:
 # FUNCIÓN 2: días entre el inicio de un periodo y el inicio del siguiente
 # Devuelve una lista de números, por ejemplo [31, 28, 31]
 def calcular_tiempo_entre_periodos(periodos) -> list:
+    """Devuelve una lista con los días que pasaron entre el inicio de cada periodo y el siguiente."""
     # Con 0 o 1 periodos no hay "siguiente" con el que comparar
     if len(periodos) < 2:
         print("No podemos calcular todavía el tiempo")
@@ -44,6 +46,7 @@ def calcular_tiempo_entre_periodos(periodos) -> list:
 # FUNCIÓN 3: media de una lista de números
 # Recibe una lista de días, por ejemplo [31, 28, 31], y devuelve su media redondeada.
 def media_de_periodo(dias_entre_periodos) -> int:
+    """Devuelve la media (redondeada) de una lista de días entre periodos."""
     # Si la lista está vacía no se puede calcular (dividiríamos entre 0)
     if len(dias_entre_periodos) < 1:
         print("No podemos calcular la media todavía")
@@ -54,6 +57,7 @@ def media_de_periodo(dias_entre_periodos) -> int:
 # FUNCIÓN 4: predecir la fecha del próximo periodo
 # Usa las funciones 2 y 3. Devuelve una fecha, o None si no hay datos suficientes.
 def predecir_proximo_periodo(periodos) -> date:
+    """Calcula la fecha en la que probablemente empezará el próximo periodo, o None si faltan datos."""
     # Salida temprana: con menos de 2 periodos no hay media que calcular.
     if len(periodos) < 2:
         print("No hay datos suficientes")
@@ -76,6 +80,7 @@ def predecir_proximo_periodo(periodos) -> date:
 # FUNCIÓN 5: en qué día del ciclo está hoy la usuaria
 # Recibe la fecha de inicio del último periodo y devuelve un número (1, 2, 3...).
 def calcular_dia_actual_ciclo(fecha_inicio) -> int:
+    """Devuelve en qué día del ciclo está la usuaria hoy, a partir del inicio de su último periodo."""
     dia_actual = date.today()                       # la fecha de hoy
     dia_ciclo_actual = dia_actual - fecha_inicio    # restar fechas da la diferencia (timedelta)
     # +1 porque el día en que empieza la regla ya es el "día 1", no el "día 0"
@@ -87,6 +92,7 @@ def calcular_dia_actual_ciclo(fecha_inicio) -> int:
 # Devuelve el día del ciclo (1, 2, 3...) o None si la fecha es anterior al primer periodo.
 # Ejemplo: periodos que empiezan el 10/09 y el 08/10 -> el 12/10 es el día 5.
 def calcular_dia_ciclo_fecha(fecha, periodos) -> int | None:
+    """Devuelve en qué día del ciclo cae una fecha cualquiera, o None si es anterior al primer periodo."""
     inicio_del_ciclo = None                     # de momento no hemos encontrado ningún ciclo
 
     # Buscamos el ÚLTIMO periodo que empezó antes de la fecha (o ese mismo día).
@@ -113,6 +119,7 @@ def calcular_dia_ciclo_fecha(fecha, periodos) -> int | None:
 DIAS_MAXIMOS_CICLO = 45     # un "ciclo" más largo seguramente son meses sin registrar
 
 def obtener_ciclos_terminados(periodos) -> list:
+    """Devuelve los ciclos ya terminados (con inicio y fin), descartando el ciclo actual y los irreales."""
     ciclos_terminados = []
 
     # Recorremos por POSICIÓN para tener cada periodo y el siguiente a la vez.
@@ -152,6 +159,7 @@ def obtener_ciclos_terminados(periodos) -> list:
 #   flujo   el 01/09 -> es ANTES del ciclo         -> no se añade
 #   cólicos el 08/10 -> ese día ya empieza el ciclo siguiente -> no se añade
 def obtener_sintomas_del_ciclo(ciclo, sintomas) -> list:
+    """Devuelve los síntomas que caen dentro de un ciclo, con su día del ciclo en vez de su fecha."""
     sintomas_ciclo = []                         # aquí guardamos los síntomas de este ciclo
 
     for sintoma in sintomas:                    # miramos los síntomas uno a uno
@@ -186,6 +194,7 @@ def obtener_sintomas_del_ciclo(ciclo, sintomas) -> list:
 VENTANA_DIAS = 1
 
 def aparece_en_ciclo(sintomas_ciclo, nombre, dia) -> bool:
+    """Dice si un síntoma concreto aparece cerca de un día dado, dentro de los síntomas de UN ciclo."""
     for sintoma in sintomas_ciclo:
         # Tienen que cumplirse las DOS cosas:
         #   - que sea el síntoma que buscamos
@@ -219,6 +228,7 @@ def aparece_en_ciclo(sintomas_ciclo, nombre, dia) -> bool:
 PORCENTAJE_MINIMO = 0.5     # 0.5 = la mitad de los ciclos
 
 def calcular_sintomas_posibles(dia, periodos, sintomas) -> list:
+    """Devuelve los síntomas que es probable tener hoy, según lo que pasó en ciclos anteriores."""
     # --- PARTE 1: preparar los ciclos que sirven (la hiciste tú) ---
 
     # 1. Solo valen los ciclos ya terminados (función 5C)
@@ -262,6 +272,7 @@ def calcular_sintomas_posibles(dia, periodos, sintomas) -> list:
 #   [{"inicio": date(2026, 11, 4), "fin": date(2026, 11, 9), "duracion": 6}, ...]
 # Si un periodo sigue en curso, su "fin" y su "duracion" son None.
 def obtener_ultimos_periodos(periodos, cantidad=5) -> list:
+    """Devuelve los últimos periodos (con su duración), del más reciente al más antiguo."""
     ultimos = []
 
     # periodos[-cantidad:] -> los últimos "cantidad" elementos de la lista (si hay menos, los que haya)
@@ -289,6 +300,7 @@ def obtener_ultimos_periodos(periodos, cantidad=5) -> list:
 # FUNCIÓN 6: comprobar que la fecha de inicio de un periodo nuevo es válida
 # Regla: no se puede registrar una regla que empiece en el futuro.
 def validar_inicio_nuevo_periodo(inicio) -> bool:
+    """Comprueba que el inicio de un periodo nuevo no sea una fecha futura."""
     if inicio <= date.today():          # hoy o un día anterior: válido
         return True
     return False                        # si llega aquí es que la fecha es futura
@@ -302,6 +314,7 @@ def validar_inicio_nuevo_periodo(inicio) -> bool:
 #     de un solo día no se da por válido en esta app.
 # "and" obliga a que se cumplan LAS DOS condiciones a la vez.
 def validar_fin_periodo(fin, inicio) -> bool:
+    """Comprueba que el fin de un periodo no sea futuro y que vaya después de su inicio."""
     if fin <= date.today() and inicio < fin:
         return True
     return False
@@ -312,6 +325,7 @@ def validar_fin_periodo(fin, inicio) -> bool:
 # Devuelve False si el nuevo empieza a menos de 15 días de algún periodo ya guardado,
 # y True si está lejos de todos (se puede guardar).
 def solapamiento_ciclos(periodos, inicio) -> bool:
+    """Comprueba que un periodo nuevo no quede demasiado cerca (menos de 15 días) de otro ya guardado."""
     for periodo in periodos:                        # comparamos con cada periodo guardado
         # Días entre el inicio del periodo guardado y el inicio del nuevo.
         # Si el nuevo es MÁS ANTIGUO que el guardado, la resta sale negativa (por ejemplo -28),
@@ -329,5 +343,6 @@ def solapamiento_ciclos(periodos, inicio) -> bool:
 SINTOMAS_VALIDOS = ["colicos", "flujo", "animo", "sueno"]
 
 def validar_sintoma(sintoma) -> bool:
+    """Comprueba que el nombre de un síntoma sea uno de los que existen en la app."""
     # "in" mira si el valor está dentro de la lista: devuelve True o False directamente
     return sintoma in SINTOMAS_VALIDOS
