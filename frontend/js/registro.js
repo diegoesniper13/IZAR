@@ -10,6 +10,7 @@ boton.addEventListener("click", async function () {
     const usuario = document.getElementById("usuario").value;
     const nombre = document.getElementById("nombre").value;
     const contrasena = document.getElementById("contrasena").value;
+    const acepto = document.getElementById("acepto").checked;   // true si la casilla está marcada
 
     // Comprobaciones rápidas antes de molestar al servidor.
     // El servidor las repite igualmente: nunca se confía solo en el frontend.
@@ -21,12 +22,17 @@ boton.addEventListener("click", async function () {
         mensaje.textContent = "La contraseña debe tener al menos 8 caracteres";
         return;
     }
+    // Sin aceptar los términos y la privacidad no se puede crear la cuenta
+    if (!acepto) {
+        mensaje.textContent = "Tienes que aceptar los términos y la política de privacidad";
+        return;
+    }
 
     // Enviamos los datos a la ruta /registro de Flask y esperamos su respuesta
     const respuesta = await fetch("/registro", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ usuario: usuario, nombre: nombre, contrasena: contrasena })
+        body: JSON.stringify({ usuario: usuario, nombre: nombre, contrasena: contrasena, acepto: acepto })
     });
     const datos = await respuesta.json();              // el JSON que devolvió Flask
 

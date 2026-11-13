@@ -33,6 +33,19 @@
             <p class="ayuda" id="ayuda-contrasena">Mínimo 8 caracteres.</p>
         </div>
 
+        <!-- Casilla de consentimiento: sin marcarla no se puede crear la cuenta.
+             Los enlaces abren los términos y la privacidad en una pestaña nueva (target="_blank")
+             para no perder lo escrito en el formulario. -->
+        <label class="casilla-acepto">
+            <input type="checkbox" id="acepto">
+            <span>
+                He leído y acepto los
+                <a href="terminos.html" target="_blank" rel="noopener">términos y condiciones</a>
+                y la
+                <a href="privacidad.html" target="_blank" rel="noopener">política de privacidad</a>.
+            </span>
+        </label>
+
         <button id="crear" class="boton boton-principal">Crear cuenta</button>
         <p id="mensaje" role="alert"></p>
 

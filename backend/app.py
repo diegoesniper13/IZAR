@@ -112,7 +112,7 @@ def inicio():
 # ---------------------------------------------------------------
 # RUTA 1: POST /registro  ->  crea una cuenta nueva
 # ---------------------------------------------------------------
-# El cliente envía: {"usuario": "ana", "nombre": "Ana", "contrasena": "abc12345"}
+# El cliente envía: {"usuario": "ana", "nombre": "Ana", "contrasena": "abc12345", "acepto": true}
 @app.route("/registro", methods=["POST"])
 def registro():
     # Límite: como mucho 10 cuentas nuevas por hora desde la misma IP (evita crear cuentas en masa)
@@ -126,8 +126,14 @@ def registro():
         usuario = datos["usuario"]
         contrasena = datos["contrasena"]
         nombre = datos["nombre"]
+        acepto = datos["acepto"]                 # True si marcó la casilla de los términos
     except (KeyError, TypeError):                # KeyError: falta una clave; TypeError: no llegó un JSON válido
         return jsonify({"error": "Faltan datos"}), 400    # 400 = "la petición es incorrecta"
+
+    # Sin aceptar los términos y la privacidad no se crea la cuenta (lo comprueba también el servidor,
+    # nunca solo el frontend). "is not True" exige exactamente True, no cualquier valor parecido.
+    if acepto is not True:
+        return jsonify({"error": "Tienes que aceptar los términos y la política de privacidad"}), 400
 
     # Comprobamos tipo y tamaño de cada dato (que sean textos y no demasiado largos)
     if not seguridad.usuario_valido(usuario):
@@ -143,6 +149,9 @@ def registro():
     # y devuelve False si ese nombre de usuario ya existe.
     if not bd.crear_usuario(usuario, nombre, contrasena):
         return jsonify({"error": "Usuario ya existente"}), 409   # 409 = "conflicto: eso ya existe"
+
+    # La cuenta ya existe: guardamos que aceptó los términos, con la fecha de hoy (función de bd.py)
+    bd.guardar_terminos(usuario)
 
     return jsonify({"creado": True}), 201        # 201 = "creado"
 

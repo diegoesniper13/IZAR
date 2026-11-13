@@ -2,7 +2,10 @@ CREATE TABLE IF NOT EXISTS usuarios (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     usuario TEXT NOT NULL UNIQUE,
     nombre TEXT NOT NULL,
-    contrasena_hash TEXT NOT NULL
+    contrasena_hash TEXT NOT NULL,
+    -- Fecha en que la usuaria aceptó los términos y la privacidad, como texto "2026-11-09".
+    -- Vacío (NULL) si todavía no los ha aceptado. Sirve para demostrar el consentimiento.
+    acepto_terminos TEXT
 );
 
 CREATE TABLE IF NOT EXISTS periodos (

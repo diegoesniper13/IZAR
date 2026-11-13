@@ -173,7 +173,23 @@ def guardar_sintoma(usuario, fecha, sintoma) -> bool:
         return False
     conexion.close()
     return True
-
+# Guarda que una usuaria ha aceptado los términos y la privacidad, con la fecha de HOY.
+# La fecha la pone la propia función (date.today()), así quien la llama no se preocupa de ella.
+# Devuelve True si se actualizó una fila, y False si esa usuaria no existe (rowcount == 0).
+def guardar_terminos(usuario) -> bool:
+    conexion = sqlite3.connect(RUTA_BD)
+    cursor = conexion.cursor()
+    # UPDATE: rellena la columna acepto_terminos de ESA usuaria con la fecha de hoy.
+    # date.today().isoformat() da el texto "2026-11-09", que es como guardamos las fechas.
+    cursor.execute(
+        "UPDATE usuarios SET acepto_terminos = ? WHERE usuario = ?",
+        (date.today().isoformat(), usuario)
+    )
+    conexion.commit()                            # sin commit el cambio NO se guarda
+    # rowcount = cuántas filas ha cambiado. 0 significa que esa usuaria no existe.
+    filas_cambiadas = cursor.rowcount
+    conexion.close()
+    return filas_cambiadas > 0
 
 # Devuelve TODOS los síntomas de una usuaria, del más antiguo al más reciente.
 # "usuario" es el nombre de usuario que está guardado en la sesión.
