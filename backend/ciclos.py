@@ -346,3 +346,28 @@ def validar_sintoma(sintoma) -> bool:
     """Comprueba que el nombre de un síntoma sea uno de los que existen en la app."""
     # "in" mira si el valor está dentro de la lista: devuelve True o False directamente
     return sintoma in SINTOMAS_VALIDOS
+
+
+# FUNCIÓN 10: comprobar que una intensidad es una de las válidas PARA ESE síntoma
+#
+# Cada síntoma tiene sus propias opciones, por eso esto no es una lista plana como
+# SINTOMAS_VALIDOS, sino un diccionario: la clave es el síntoma y el valor es la
+# lista de intensidades que acepta ESE síntoma.
+#   - colicos: intenso o suave
+#   - flujo:   mucho, normal o poco
+#   - animo:   feliz, enfadada o triste
+#   - sueno:   mucho o poco
+INTENSIDADES_VALIDAS = {
+    "colicos": ["intenso", "suave"],
+    "flujo": ["mucho", "normal", "poco"],
+    "animo": ["feliz", "enfadada", "triste"],
+    "sueno": ["mucho", "poco"]
+}
+
+def validar_intensidad(sintoma, intensidad) -> bool:
+    """Comprueba que la intensidad recibida sea una de las válidas para ESE síntoma en concreto."""
+    # Primero el síntoma tiene que existir, si no, ni siquiera miramos las intensidades.
+    if not validar_sintoma(sintoma):
+        return False
+    # INTENSIDADES_VALIDAS[sintoma] da la lista de ESE síntoma, por ejemplo ["intenso", "suave"]
+    return intensidad in INTENSIDADES_VALIDAS[sintoma]

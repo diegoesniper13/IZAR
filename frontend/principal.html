@@ -72,6 +72,19 @@
             <p id="mensaje-sintomas" class="mensaje-sintomas"></p>
         </section>
 
+        <!-- ===================== VENTANA DE INTENSIDAD =====================
+             Se abre al pulsar un síntoma, antes de guardar nada. principal.js
+             rellena el título y los botones según el síntoma pulsado (cada
+             síntoma tiene sus propias opciones: ver INTENSIDADES_VALIDAS en ciclos.py). -->
+        <dialog id="ventana-intensidad" class="ventana">
+            <h3 id="titulo-intensidad" class="titulo-ventana">¿Cómo de fuerte?</h3>
+
+            <!-- principal.js crea aquí un botón por cada opción (intenso, suave...) -->
+            <div id="opciones-intensidad" class="opciones-intensidad"></div>
+
+            <button id="cancelar-intensidad" class="boton boton-secundario">CANCELAR</button>
+        </dialog>
+
         <!-- ===================== VENTANA DEL CALENDARIO =====================
              <dialog> es una ventana que sale por encima de la página.
              Está oculta hasta que principal.js la abre con .showModal().

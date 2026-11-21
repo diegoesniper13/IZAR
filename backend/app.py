@@ -391,12 +391,13 @@ def nuevo_sintoma():
     if not usuario:
         return jsonify({"error": "No autorizado. Inicia sesión antes"}), 401
 
-    # 2. LEER DATOS: los dos son obligatorios, por eso usamos corchetes y no .get()
+    # 2. LEER DATOS: los tres son obligatorios, por eso usamos corchetes y no .get()
     # (si falta alguno salta KeyError y respondemos "Faltan datos")
     datos = request.get_json(silent=True)
     try:
         fecha = date.fromisoformat(datos["fecha"])     # texto "2026-11-05" -> fecha de verdad
         sintoma = datos["sintoma"]                     # por ejemplo "colicos"
+        intensidad = datos["intensidad"]               # por ejemplo "intenso"
     except (KeyError, TypeError, ValueError):          # falta una clave, no hay JSON o la fecha no existe
         return jsonify({"error": "Faltan datos"}), 400
 
@@ -409,10 +410,16 @@ def nuevo_sintoma():
     if not ciclos.validar_sintoma(sintoma):
         return jsonify({"error": "Ese síntoma no existe"}), 400
 
+    # 3C. La intensidad tiene que ser una de las válidas PARA ESE síntoma
+    # (validar_intensidad ya comprueba el síntoma otra vez por dentro, pero no pasa nada
+    # por repetirlo: así esta función es segura aunque se llame sola, sin pasar por 3B)
+    if not ciclos.validar_intensidad(sintoma, intensidad):
+        return jsonify({"error": "Esa intensidad no es válida para ese síntoma"}), 400
+
     # 4. GUARDAR. La fecha va como texto con .isoformat(), igual que en los periodos.
     # guardar_sintoma devuelve False si ese síntoma ya estaba guardado ese día.
     # (Que la usuaria no exista no puede pasar aquí: viene de una sesión válida.)
-    if not bd.guardar_sintoma(usuario, fecha.isoformat(), sintoma):
+    if not bd.guardar_sintoma(usuario, fecha.isoformat(), sintoma, intensidad):
         return jsonify({"error": "Ya registraste ese síntoma ese día"}), 409   # 409 = "conflicto: eso ya existe"
 
     # 5. RESPONDER: 201 = "creado"

@@ -205,23 +205,23 @@ def iniciar_sesion(usuario, contrasena) -> bool:
 # SÍNTOMAS
 # ---------------------------------------------------------------
 
-# Guarda un síntoma de una usuaria en un día concreto.
-# "fecha" y "sintoma" llegan como texto, por ejemplo "2026-11-05" y "colicos".
+# Guarda un síntoma de una usuaria en un día concreto, con su intensidad.
+# "fecha", "sintoma" e "intensidad" llegan como texto, por ejemplo "2026-11-05", "colicos" e "intenso".
 # Devuelve True si se guardó, y False si:
 #   - ese síntoma ya estaba guardado ese mismo día (la tabla tiene UNIQUE(usuario_id, fecha, sintoma)), o
 #   - la usuaria no existe (la subconsulta da "nada" y usuario_id es obligatorio).
 # En los dos casos SQLite da IntegrityError.
-def guardar_sintoma(usuario, fecha, sintoma) -> bool:
-    """Guarda un síntoma de una usuaria en un día concreto."""
+def guardar_sintoma(usuario, fecha, sintoma, intensidad) -> bool:
+    """Guarda un síntoma de una usuaria en un día concreto, con la intensidad elegida."""
     conexion = sqlite3.connect(RUTA_BD)
     cursor = conexion.cursor()
     try:
-        # Los tres ? se rellenan, por orden, con usuario, fecha y sintoma.
+        # Los cuatro ? se rellenan, por orden, con usuario, fecha, sintoma e intensidad.
         # La subconsulta traduce el nombre de usuario a su id, como en guardar_periodo.
         cursor.execute(
-            "INSERT INTO sintomas (usuario_id, fecha, sintoma) "
-            "VALUES ((SELECT id FROM usuarios WHERE usuario = ?), ?, ?)",
-            (usuario, fecha, sintoma)
+            "INSERT INTO sintomas (usuario_id, fecha, sintoma, intensidad) "
+            "VALUES ((SELECT id FROM usuarios WHERE usuario = ?), ?, ?, ?)",
+            (usuario, fecha, sintoma, intensidad)
         )
         conexion.commit()                        # sin commit el dato NO se guarda en el archivo
     except sqlite3.IntegrityError:               # síntoma repetido ese día o usuaria inexistente
@@ -257,20 +257,21 @@ def obtener_sintomas(usuario) -> list:
     cursor = conexion.cursor()
     # Igual que en obtener_periodos: la subconsulta traduce el nombre al id,
     # y ORDER BY fecha los ordena de más antiguo a más reciente.
+    # Pedimos también "intensidad" para que llegue hasta el frontend.
     cursor.execute(
-        "SELECT fecha, sintoma FROM sintomas "
+        "SELECT fecha, sintoma, intensidad FROM sintomas "
         "WHERE usuario_id = (SELECT id FROM usuarios WHERE usuario = ?) "
         "ORDER BY fecha",
         (usuario,)                               # el valor del ? va en una tupla (con coma al final)
     )
-    filas = cursor.fetchall()                    # lista de tuplas: [('2026-11-05', 'colicos'), ...]
+    filas = cursor.fetchall()                    # lista de tuplas: [('2026-11-05', 'colicos', 'intenso'), ...]
     conexion.close()
     return creador_de_sintoma(filas)
 
 
 # Traduce las filas al formato que usarán las funciones de ciclos.py
-# De: ('2026-11-05', 'colicos')                             <- tupla con textos
-# A:  {"fecha": date(2026, 11, 5), "sintoma": "colicos"}    <- diccionario con la fecha de verdad
+# De: ('2026-11-05', 'colicos', 'intenso')                                        <- tupla con textos
+# A:  {"fecha": date(2026, 11, 5), "sintoma": "colicos", "intensidad": "intenso"} <- diccionario con la fecha de verdad
 # Una fila = un síntoma: si un día hay dos síntomas, salen dos diccionarios con la misma fecha.
 def creador_de_sintoma(filas) -> list:
     """Convierte filas de síntomas (textos) en diccionarios con la fecha de verdad."""
@@ -278,7 +279,8 @@ def creador_de_sintoma(filas) -> list:
     for fila in filas:
         sintoma = {
             "fecha": date.fromisoformat(fila[0]),     # texto "año-mes-día" -> fecha de verdad
-            "sintoma": fila[1]                        # el nombre ya es texto: se queda igual
+            "sintoma": fila[1],                       # el nombre ya es texto: se queda igual
+            "intensidad": fila[2]                     # igual: "intenso", "feliz", "mucho"...
         }
         sintomas.append(sintoma)
     return sintomas                              # la lista completa (no solo el último)

@@ -314,7 +314,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     // ---------------------------------------------------------------
-    // BOTONES DE SÍNTOMAS: guardan el síntoma con la fecha de hoy
+    // BOTONES DE SÍNTOMAS: al pulsar uno, se abre la ventana de intensidad
     // ---------------------------------------------------------------
     // Solo los botones que tienen data-sintoma (los 4 síntomas). El botón "Borrar hoy"
     // también usa la clase boton-sintoma para verse igual, pero no tiene data-sintoma,
@@ -322,70 +322,139 @@ document.addEventListener("DOMContentLoaded", () => {
     const botonesSintoma = document.querySelectorAll(".boton-sintoma[data-sintoma]");
     const mensajeSintomas = document.querySelector("#mensaje-sintomas");
 
+    // Elementos de la ventana de intensidad (la que se abre al pulsar un síntoma)
+    const ventanaIntensidad = document.querySelector("#ventana-intensidad");
+    const tituloIntensidad = document.querySelector("#titulo-intensidad");
+    const opcionesIntensidad = document.querySelector("#opciones-intensidad");
+    const botonCancelarIntensidad = document.querySelector("#cancelar-intensidad");
+
+    // Las opciones de intensidad de cada síntoma. "valor" es lo que se manda al servidor
+    // (tiene que coincidir con INTENSIDADES_VALIDAS de ciclos.py); "texto" es lo que se ve.
+    const OPCIONES_INTENSIDAD = {
+        colicos: [
+            { valor: "intenso", texto: "Intenso" },
+            { valor: "suave", texto: "Suave" }
+        ],
+        flujo: [
+            { valor: "mucho", texto: "Mucho" },
+            { valor: "normal", texto: "Normal" },
+            { valor: "poco", texto: "Poco" }
+        ],
+        animo: [
+            { valor: "feliz", texto: "Feliz" },
+            { valor: "enfadada", texto: "Enfadada" },
+            { valor: "triste", texto: "Triste" }
+        ],
+        sueno: [
+            { valor: "mucho", texto: "Mucho" },
+            { valor: "poco", texto: "Poco" }
+        ]
+    };
+
+    // Guardamos aquí qué botón abrió la ventana, para poder reactivarlo al terminar
+    let botonSintomaActivo = null;
+
     // forEach recorre la lista de botones y le pone a CADA uno el mismo "escuchador" de clic
     botonesSintoma.forEach((boton) => {
-        boton.addEventListener("click", async () => {
+        boton.addEventListener("click", () => {
             // dataset.sintoma lee el atributo data-sintoma del HTML: "colicos", "flujo"...
             const sintoma = boton.dataset.sintoma;
-            // Texto visible del botón sin el emoji, para los mensajes ("Cólicos").
+            // Texto visible del botón sin el emoji, para el título y los mensajes ("Cólicos").
             // Quitamos el texto del <span> (el emoji) y los espacios de los lados con trim().
             const emoji = boton.querySelector("span").textContent;
             const nombreVisible = boton.textContent.replace(emoji, "").trim();
 
-            // Quitamos el mensaje anterior
-            mensajeSintomas.textContent = "";
-            mensajeSintomas.classList.remove("error");
+            botonSintomaActivo = boton;
+            abrirVentanaIntensidad(sintoma, nombreVisible);
+        });
+    });
 
-            boton.disabled = true;                   // evita dos clics seguidos mientras esperamos
+    // Abre la ventana de intensidad y crea un botón por cada opción de ESE síntoma
+    function abrirVentanaIntensidad(sintoma, nombreVisible) {
+        tituloIntensidad.textContent = nombreVisible;
 
-            try {
-                // Enviamos {"fecha": "2026-11-05", "sintoma": "colicos"} a la ruta 7 de app.py
-                const respuesta = await fetch("/sintoma", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ fecha: fechaDeHoy(), sintoma: sintoma })
-                });
+        opcionesIntensidad.innerHTML = "";          // quita los botones de la vez anterior
 
-                if (respuesta.status === 401) {      // la sesión ha caducado
-                    window.location.href = "login.html";
-                    return;
-                }
+        // Un botón por cada opción del síntoma pulsado (2 para cólicos, 3 para flujo...)
+        OPCIONES_INTENSIDAD[sintoma].forEach((opcion) => {
+            const botonOpcion = document.createElement("button");
+            botonOpcion.type = "button";
+            botonOpcion.className = "boton-opcion-intensidad";
+            botonOpcion.textContent = opcion.texto;        // lo que ve la usuaria, por ejemplo "Intenso"
+            // Al elegir una opción, cerramos la ventana y guardamos el síntoma con esa intensidad
+            botonOpcion.addEventListener("click", () => {
+                ventanaIntensidad.close();
+                guardarSintoma(sintoma, opcion.valor, nombreVisible);
+            });
+            opcionesIntensidad.appendChild(botonOpcion);
+        });
 
-                // 500 = el servidor ha fallado por dentro (un error de Python).
-                // En ese caso Flask no devuelve JSON sino una página HTML, y .json() fallaría:
-                // por eso lo comprobamos antes y lo explicamos. El detalle está en la terminal de Flask.
-                if (respuesta.status === 500) {
-                    mensajeSintomas.textContent = "Error en el servidor. Mira la terminal de Flask";
-                    mensajeSintomas.classList.add("error");
-                    boton.disabled = false;
-                    return;
-                }
+        ventanaIntensidad.showModal();
+    }
 
-                const datos = await respuesta.json();
+    // Botón "Cancelar" de la ventana de intensidad: cierra sin guardar nada
+    botonCancelarIntensidad.addEventListener("click", () => {
+        ventanaIntensidad.close();
+    });
 
-                // Los botones son de un solo clic: no se quedan marcados.
-                // Lo único que cambia es el mensaje de debajo.
-                if (respuesta.ok) {
-                    // 201: guardado
-                    mensajeSintomas.textContent = `${nombreVisible}: guardado para hoy`;
-                } else if (respuesta.status === 409) {
-                    // 409: ya estaba guardado hoy. No es un fallo grave: solo lo avisamos.
-                    mensajeSintomas.textContent = `${nombreVisible}: ya estaba registrado hoy`;
-                } else {
-                    // Cualquier otro error: mostramos el mensaje que mandó app.py, en rojo
-                    mensajeSintomas.textContent = datos.error;
-                    mensajeSintomas.classList.add("error");
-                }
+    // Manda el síntoma, con la intensidad elegida, a la ruta 7 de app.py
+    async function guardarSintoma(sintoma, intensidad, nombreVisible) {
+        // Quitamos el mensaje anterior
+        mensajeSintomas.textContent = "";
+        mensajeSintomas.classList.remove("error");
 
-            } catch (error) {
-                console.error("Error de conexión:", error);
-                mensajeSintomas.textContent = "No se pudo conectar con el servidor";
+        if (botonSintomaActivo) {
+            botonSintomaActivo.disabled = true;      // evita dos clics seguidos mientras esperamos
+        }
+
+        try {
+            // Enviamos {"fecha": "2026-11-05", "sintoma": "colicos", "intensidad": "intenso"}
+            const respuesta = await fetch("/sintoma", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ fecha: fechaDeHoy(), sintoma: sintoma, intensidad: intensidad })
+            });
+
+            if (respuesta.status === 401) {      // la sesión ha caducado
+                window.location.href = "login.html";
+                return;
+            }
+
+            // 500 = el servidor ha fallado por dentro (un error de Python).
+            // En ese caso Flask no devuelve JSON sino una página HTML, y .json() fallaría:
+            // por eso lo comprobamos antes y lo explicamos. El detalle está en la terminal de Flask.
+            if (respuesta.status === 500) {
+                mensajeSintomas.textContent = "Error en el servidor. Mira la terminal de Flask";
+                mensajeSintomas.classList.add("error");
+                return;
+            }
+
+            const datos = await respuesta.json();
+
+            // Los botones son de un solo clic: no se quedan marcados.
+            // Lo único que cambia es el mensaje de debajo.
+            if (respuesta.ok) {
+                // 201: guardado
+                mensajeSintomas.textContent = `${nombreVisible}: guardado para hoy`;
+            } else if (respuesta.status === 409) {
+                // 409: ya estaba guardado hoy. No es un fallo grave: solo lo avisamos.
+                mensajeSintomas.textContent = `${nombreVisible}: ya estaba registrado hoy`;
+            } else {
+                // Cualquier otro error: mostramos el mensaje que mandó app.py, en rojo
+                mensajeSintomas.textContent = datos.error;
                 mensajeSintomas.classList.add("error");
             }
 
-            boton.disabled = false;                  // volvemos a activar el botón
-        });
-    });
+        } catch (error) {
+            console.error("Error de conexión:", error);
+            mensajeSintomas.textContent = "No se pudo conectar con el servidor";
+            mensajeSintomas.classList.add("error");
+        }
+
+        if (botonSintomaActivo) {
+            botonSintomaActivo.disabled = false;     // volvemos a activar el botón
+        }
+    }
 
 
     // ---------------------------------------------------------------
