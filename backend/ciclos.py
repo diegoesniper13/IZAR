@@ -293,6 +293,41 @@ def obtener_ultimos_periodos(periodos, cantidad=5) -> list:
     return ultimos
 
 
+
+def obtener_ovulacion(periodos)->date:
+    """Devuelve el dia aproximado de la ovulacion"""
+    proximo_periodo = predecir_proximo_periodo(periodos)
+    if proximo_periodo == None:
+        return None        
+    return proximo_periodo - timedelta(days=14)
+
+
+def duracion_media_periodo(periodos)->int:
+    suma_total:int = 0
+    contador: int = 0
+    for periodo in periodos:
+        if periodo["fin"] != None: 
+            inicio = periodo["inicio"]
+            fin = periodo["fin"]
+            duracion: int = calcular_diferencia(inicio,fin) + 1
+            suma_total += duracion
+            contador += 1
+    if contador == 0:
+        return None
+    return round(suma_total / contador)
+
+
+def ventana_fertil(ovulacion)->dict:
+    """Calcula los dias en los que puede estar fertil"""
+    if ovulacion == None:
+        return None
+    ventana:dict = {
+        "inicio": ovulacion - timedelta(days=4),
+        "fin": ovulacion + timedelta(days=1)
+    }
+    return ventana
+
+
 # ---------------------------------------------------------------
 # VALIDACIONES  (todas devuelven True si se puede guardar y False si no)
 # ---------------------------------------------------------------

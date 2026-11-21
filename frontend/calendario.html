@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendario - IZAR</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <!-- Misma caja que el resto de pantallas, para que todas se vean iguales -->
+    <main class="caja aplicacion">
+
+        <!-- ===================== CABECERA: logo y perfil ===================== -->
+        <header class="cabecera-app">
+            <div class="marca">
+                <svg class="estrella" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                </svg>
+                <span class="nombre">IZAR</span>
+            </div>
+            <!-- Engranaje: lleva a la página de ajustes -->
+            <a href="ajustes.html" class="icono-ajustes" aria-label="Ajustes"><svg viewBox="0 0 24 24"><path d="M19.4 13c.04-.33.06-.66.06-1s-.02-.67-.06-1l2.11-1.65a.5.5 0 0 0 .12-.64l-2-3.46a.5.5 0 0 0-.61-.22l-2.49 1a7.3 7.3 0 0 0-1.73-1l-.38-2.65A.5.5 0 0 0 14 1h-4a.5.5 0 0 0-.49.42l-.38 2.65c-.62.25-1.2.59-1.73 1l-2.49-1a.5.5 0 0 0-.61.22l-2 3.46a.5.5 0 0 0 .12.64L4.6 11c-.04.33-.06.66-.06 1s.02.67.06 1l-2.11 1.65a.5.5 0 0 0-.12.64l2 3.46c.14.24.44.32.68.22l2.49-1c.53.41 1.11.75 1.73 1l.38 2.65c.04.24.25.42.49.42h4c.24 0 .45-.18.49-.42l.38-2.65c.62-.25 1.2-.59 1.73-1l2.49 1c.24.1.54.02.68-.22l2-3.46a.5.5 0 0 0-.12-.64L19.4 13zM12 15.5A3.5 3.5 0 1 1 12 8.5a3.5 3.5 0 0 1 0 7z"/></svg></a>
+        </header>
+
+        <!-- ===================== CALENDARIO DEL MES =====================
+             calendario.js dibuja aquí los días del mes y pinta los que tienen
+             algo que enseñar (regla real, regla prevista, ovulación, días fértiles).
+             La flecha "<" y ">" solo cambian qué mes se ve: los datos (periodos,
+             predicción) se piden una sola vez a /calendario, no en cada cambio de mes. -->
+        <section class="tarjeta">
+            <div class="cabecera-calendario">
+                <button id="mes-anterior" class="boton-flecha-mes" type="button" aria-label="Mes anterior">‹</button>
+                <!-- Por ejemplo "Noviembre 2026" -->
+                <h3 id="titulo-mes" class="titulo-mes">Cargando...</h3>
+                <button id="mes-siguiente" class="boton-flecha-mes" type="button" aria-label="Mes siguiente">›</button>
+            </div>
+
+            <!-- Cabecera con las letras de los días de la semana (L M X J V S D) -->
+            <div class="semana-calendario">
+                <span>L</span><span>M</span><span>X</span><span>J</span><span>V</span><span>S</span><span>D</span>
+            </div>
+
+            <!-- calendario.js mete aquí una casilla por día del mes (y vacías antes
+                 del día 1, para que encaje con la columna de su día de la semana) -->
+            <div id="dias-calendario" class="dias-calendario"></div>
+
+            <!-- Leyenda: qué significa cada color -->
+            <div class="leyenda-calendario">
+                <span class="punto-leyenda punto-regla"></span> Regla
+                <span class="punto-leyenda punto-regla-prevista"></span> Regla prevista
+                <span class="punto-leyenda punto-fertil"></span> Días fértiles
+                <span class="punto-leyenda punto-ovulacion"></span> Ovulación
+            </div>
+
+            <!-- Si todavía no hay predicción (hacen falta al menos 2 periodos), lo explica aquí -->
+            <p id="explicacion-calendario" class="nota nota-abajo"></p>
+        </section>
+
+        <!-- ===================== MENÚ INFERIOR ===================== -->
+        <nav class="navegacion-inferior">
+            <a href="principal.html" class="nav-item"><span>📝</span> Registro</a>
+            <a href="estadisticas.html" class="nav-item"><span>📊</span> Estadísticas</a>
+            <a href="calendario.html" class="nav-item activo"><span>📅</span> Calendario</a>
+        </nav>
+
+    </main>
+
+    <script src="js/calendario.js"></script>
+</body>
+</html>

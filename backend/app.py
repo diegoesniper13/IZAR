@@ -517,6 +517,63 @@ def borrar_cuenta():
 
     return jsonify({"true":True}),200
 
+
+# ---------------------------------------------------------------
+# RUTA 11: GET /calendario  ->  últimos 2 periodos + predicción para el calendario
+# ---------------------------------------------------------------
+# Responde siempre con "periodos" (los últimos 2 reales) y "prediccion".
+# Si todavía no hay al menos 2 periodos, "prediccion" manda sus 5 campos a None:
+# el frontend lo entiende como "aún no hay predicción" y no pinta esos colores.
+@app.route("/calendario")
+def calendario():
+    # 1. SEGURIDAD: la usuaria sale de la sesión, como en el resto de rutas
+    usuario = session.get("usuario")
+    if not usuario:
+        return jsonify({"error":"inicia sesion antes"}),401
+
+    # 2. Los últimos 2 periodos reales, con sus fechas convertidas a texto.
+    # fin puede ser None (periodo en curso): en ese caso no hay nada que convertir.
+    periodos = bd.obtener_periodos(usuario)
+    periodos_calendario = []
+    for periodo in periodos[-2:]:
+        periodos_calendario.append({
+            "inicio": periodo["inicio"].isoformat(),
+            "fin": periodo["fin"].isoformat() if periodo["fin"] is not None else None
+        })
+
+    # 3. PREDICCIÓN: solo se puede calcular con 2 periodos o más
+    proximo_periodo = ciclos.predecir_proximo_periodo(periodos)
+    if proximo_periodo == None:
+        # Todavía no hay suficientes periodos: respondemos igualmente con
+        # los periodos que haya, y la predicción entera a None.
+        return jsonify({
+            "periodos": periodos_calendario,
+            "prediccion": {
+                "inicio_periodo": None,
+                "duracion_periodo": None,
+                "ovulacion": None,
+                "ventana_fertil_inicio": None,
+                "ventana_fertil_fin": None
+            }
+        })
+
+    duracion = ciclos.duracion_media_periodo(periodos)
+    ovulacion = ciclos.obtener_ovulacion(periodos)
+    ventana_fertil = ciclos.ventana_fertil(ovulacion)
+    inicio_fertil = ventana_fertil["inicio"]
+    fin_fertil = ventana_fertil["fin"]
+
+    # 4. RESPUESTA: duracion es un número (no una fecha), no se convierte con isoformat
+    return jsonify({"periodos":periodos_calendario,
+                    "prediccion":{
+                        "inicio_periodo": date.isoformat(proximo_periodo),
+                        "duracion_periodo":duracion,
+                        "ovulacion":date.isoformat(ovulacion),
+                        "ventana_fertil_inicio":date.isoformat(inicio_fertil),
+                        "ventana_fertil_fin":date.isoformat(fin_fertil)
+                    }})
+
+
 # ---------------------------------------------------------------
 # ARRANQUE DEL SERVIDOR
 # ---------------------------------------------------------------
