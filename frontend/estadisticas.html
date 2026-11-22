@@ -10,8 +10,13 @@
     <!-- Misma caja que principal.html, para que las dos pantallas se vean iguales -->
     <main class="caja aplicacion">
 
-        <!-- ===================== CABECERA: logo y perfil ===================== -->
+        <!-- ===================== CABECERA: menú, logo y ajustes ===================== -->
         <header class="cabecera-app">
+            <!-- Botón ☰: abre el menú lateral (lo controla js/menu.js) -->
+            <button id="abrir-menu" class="boton-menu" type="button" aria-label="Abrir menú"
+                    aria-expanded="false" aria-controls="menu-lateral">
+                <span></span><span></span><span></span>
+            </button>
             <div class="marca">
                 <svg class="estrella" viewBox="0 0 24 24" aria-hidden="true">
                     <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
@@ -55,16 +60,27 @@
             <p id="explicacion-sintomas" class="nota nota-abajo"></p>
         </section>
 
-        <!-- ===================== MENÚ INFERIOR =====================
-             Aquí la página activa (en rosa) es Estadísticas -->
-        <nav class="navegacion-inferior">
-            <a href="principal.html" class="nav-item"><span>📝</span> Registro</a>
-            <a href="estadisticas.html" class="nav-item activo"><span>📊</span> Estadísticas</a>
-            <a href="calendario.html" class="nav-item"><span>📅</span> Calendario</a>
+        <!-- ===================== MENÚ LATERAL =====================
+             Escondido a la izquierda hasta que js/menu.js le pone la clase "abierto".
+             "fondo-menu" es la capa oscura de detrás: al tocarla, el menú se cierra.
+             "activo" pinta de rosa la página en la que estás. -->
+        <div id="fondo-menu" class="fondo-menu"></div>
+        <nav id="menu-lateral" class="menu-lateral" aria-label="Menú principal">
+            <div class="cabecera-menu">
+                <span class="nombre">IZAR</span>
+                <button id="cerrar-menu" class="boton-cerrar-menu" type="button" aria-label="Cerrar menú">✕</button>
+            </div>
+            <a href="principal.html" class="item-menu"><span>📝</span> Registro</a>
+            <a href="estadisticas.html" class="item-menu activo"><span>📊</span> Estadísticas</a>
+            <a href="calendario.html" class="item-menu"><span>📅</span> Calendario</a>
+            <a href="informacion.html" class="item-menu"><span>📖</span> Información</a>
+            <hr class="separador-menu">
+            <a href="ajustes.html" class="item-menu"><span>⚙️</span> Ajustes</a>
         </nav>
 
     </main>
 
+    <script src="js/menu.js"></script>
     <script src="js/estadisticas.js"></script>
 </body>
 </html>

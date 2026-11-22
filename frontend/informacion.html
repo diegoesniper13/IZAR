@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Información - IZAR</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <!-- Página de información: contenido FIJO (no habla con el servidor).
+         Los dibujos son archivos .svg de la carpeta img/ (dibujos hechos con código:
+         se ven nítidos a cualquier tamaño y pesan muy poco).
+         Lo único que se mueve es la sección "Explora tu ciclo", que controla js/informacion.js. -->
+    <main class="caja aplicacion">
+
+        <!-- ===================== CABECERA: menú, logo y ajustes ===================== -->
+        <header class="cabecera-app">
+            <!-- Botón ☰: abre el menú lateral (lo controla js/menu.js) -->
+            <button id="abrir-menu" class="boton-menu" type="button" aria-label="Abrir menú"
+                    aria-expanded="false" aria-controls="menu-lateral">
+                <span></span><span></span><span></span>
+            </button>
+            <div class="marca">
+                <svg class="estrella" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                </svg>
+                <span class="nombre">IZAR</span>
+            </div>
+            <!-- Engranaje: lleva a la página de ajustes -->
+            <a href="ajustes.html" class="icono-ajustes" aria-label="Ajustes"><svg viewBox="0 0 24 24"><path d="M19.4 13c.04-.33.06-.66.06-1s-.02-.67-.06-1l2.11-1.65a.5.5 0 0 0 .12-.64l-2-3.46a.5.5 0 0 0-.61-.22l-2.49 1a7.3 7.3 0 0 0-1.73-1l-.38-2.65A.5.5 0 0 0 14 1h-4a.5.5 0 0 0-.49.42l-.38 2.65c-.62.25-1.2.59-1.73 1l-2.49-1a.5.5 0 0 0-.61.22l-2 3.46a.5.5 0 0 0 .12.64L4.6 11c-.04.33-.06.66-.06 1s.02.67.06 1l-2.11 1.65a.5.5 0 0 0-.12.64l2 3.46c.14.24.44.32.68.22l2.49-1c.53.41 1.11.75 1.73 1l.38 2.65c.04.24.25.42.49.42h4c.24 0 .45-.18.49-.42l.38-2.65c.62-.25 1.2-.59 1.73-1l2.49 1c.24.1.54.02.68-.22l2-3.46a.5.5 0 0 0-.12-.64L19.4 13zM12 15.5A3.5 3.5 0 1 1 12 8.5a3.5 3.5 0 0 1 0 7z"/></svg></a>
+        </header>
+
+        <!-- ===================== PORTADA E ÍNDICE ===================== -->
+        <section class="portada-info">
+            <h1 class="titulo-info">Conoce tu ciclo</h1>
+            <p class="entradilla">Lo básico sobre la regla, explicado con dibujos.</p>
+            <!-- Cada "chip" es un enlace a una sección de esta misma página (href="#id") -->
+            <nav class="indice-info" aria-label="Secciones">
+                <a href="#que-es" class="chip-indice">🩸 Qué es</a>
+                <a href="#ciclo" class="chip-indice">🔄 El ciclo</a>
+                <a href="#fases" class="chip-indice">🌙 Fases</a>
+                <a href="#explora" class="chip-indice">🔍 Día a día</a>
+                <a href="#hormonas" class="chip-indice">⚗️ Hormonas</a>
+                <a href="#ovulacion" class="chip-indice">🥚 Ovulación</a>
+                <a href="#sintomas" class="chip-indice">〰️ Síntomas</a>
+                <a href="#normal" class="chip-indice">✅ Qué es normal</a>
+                <a href="#mitos" class="chip-indice">💬 Mitos</a>
+            </nav>
+        </section>
+
+        <!-- ===================== 1. ¿QUÉ ES LA REGLA? ===================== -->
+        <section id="que-es" class="tarjeta bloque-info">
+            <h2 class="titulo-bloque">🩸 ¿Qué es la regla?</h2>
+            <img src="img/utero.svg" class="ilustracion"
+                 alt="Dibujo del útero con las trompas de Falopio, los ovarios, el endometrio y el cuello del útero">
+            <p class="texto-info">
+                Cada mes, el <strong>útero</strong> prepara una capa interna blandita, el
+                <strong>endometrio</strong>, por si hubiera un embarazo. Si no lo hay, esa capa
+                ya no hace falta: se desprende y sale por la vagina junto con un poco de sangre.
+                Eso es la <strong>regla</strong> (o menstruación).
+            </p>
+            <p class="dato-clave">
+                💡 El <strong>día 1</strong> del ciclo es el primer día de sangrado. El ciclo
+                dura desde ahí hasta el día antes de la siguiente regla.
+            </p>
+        </section>
+
+        <!-- ===================== 2. EL CICLO DE UN VISTAZO ===================== -->
+        <section id="ciclo" class="tarjeta bloque-info">
+            <h2 class="titulo-bloque">🔄 El ciclo de un vistazo</h2>
+            <img src="img/ciclo-rueda.svg" class="ilustracion ilustracion-rueda"
+                 alt="Rueda de 28 días: regla del 1 al 5, fase folicular del 6 al 13, ovulación el 14 y fase lútea del 15 al 28">
+            <!-- Leyenda: qué significa cada color de la rueda -->
+            <div class="leyenda-fases">
+                <span class="chip-fase fase-regla"><span class="punto-fase"></span>Regla</span>
+                <span class="chip-fase fase-folicular"><span class="punto-fase"></span>Folicular</span>
+                <span class="chip-fase fase-ovulacion"><span class="punto-fase"></span>Ovulación</span>
+                <span class="chip-fase fase-lutea"><span class="punto-fase"></span>Lútea</span>
+                <span class="chip-fase fase-fertil"><span class="punto-fase"></span>Días fértiles</span>
+            </div>
+            <p class="texto-info texto-pequeno">
+                El ejemplo es de 28 días, pero cada cuerpo es distinto: un ciclo de
+                <strong>21 a 35 días</strong> es normal. Cuando un ciclo es más largo o más
+                corto, lo que cambia sobre todo es la parte de <em>antes</em> de la ovulación.
+            </p>
+        </section>
+
+        <!-- ===================== 3. LAS 4 FASES =====================
+             Una tarjeta por fase. La clase fase-regla / fase-folicular... le da su color
+             (ver styles.css: cada una define sus propias variables de color). -->
+        <section id="fases" class="bloque-info">
+            <h2 class="titulo-bloque titulo-suelto">🌙 Las 4 fases</h2>
+
+            <article class="fase fase-regla">
+                <img src="img/fase-regla.svg" class="dibujo-fase" alt="">
+                <div>
+                    <div class="cabecera-fase">
+                        <h3>Regla</h3>
+                        <span class="badge-dias">Días 1–5</span>
+                    </div>
+                    <p><strong>Qué pasa:</strong> el útero suelta el endometrio y sangras.</p>
+                    <p><strong>Cómo te puedes sentir:</strong> cólicos, cansancio, menos energía.</p>
+                </div>
+            </article>
+
+            <article class="fase fase-folicular">
+                <img src="img/fase-folicular.svg" class="dibujo-fase" alt="">
+                <div>
+                    <div class="cabecera-fase">
+                        <h3>Fase folicular</h3>
+                        <span class="badge-dias">Días 1–13</span>
+                    </div>
+                    <p><strong>Qué pasa:</strong> en el ovario crecen los <em>folículos</em> (bolsitas con un óvulo dentro) y sube el estrógeno.</p>
+                    <p><strong>Cómo te puedes sentir:</strong> más energía y mejor humor según avanza.</p>
+                </div>
+            </article>
+
+            <article class="fase fase-ovulacion">
+                <img src="img/fase-ovulacion.svg" class="dibujo-fase" alt="">
+                <div>
+                    <div class="cabecera-fase">
+                        <h3>Ovulación</h3>
+                        <span class="badge-dias">Día 14</span>
+                    </div>
+                    <p><strong>Qué pasa:</strong> el folículo más grande se abre y suelta un óvulo.</p>
+                    <p><strong>Cómo te puedes sentir:</strong> flujo transparente y elástico; a veces un pinchazo leve en un lado.</p>
+                </div>
+            </article>
+
+            <article class="fase fase-lutea">
+                <img src="img/fase-lutea.svg" class="dibujo-fase" alt="">
+                <div>
+                    <div class="cabecera-fase">
+                        <h3>Fase lútea</h3>
+                        <span class="badge-dias">Días 15–28</span>
+                    </div>
+                    <p><strong>Qué pasa:</strong> el folículo vacío se convierte en el <em>cuerpo lúteo</em>, que fabrica progesterona para engrosar el endometrio.</p>
+                    <p><strong>Cómo te puedes sentir:</strong> al final, hinchazón, pecho sensible o cambios de ánimo (el famoso SPM).</p>
+                </div>
+            </article>
+
+            <p class="texto-info texto-pequeno nota-fases">
+                ¿Por qué la regla y la fase folicular se solapan? Porque la fase folicular
+                empieza el día 1: mientras sangras, el ovario ya está preparando el siguiente óvulo.
+            </p>
+        </section>
+
+        <!-- ===================== 4. EXPLORA TU CICLO DÍA A DÍA =====================
+             La parte interactiva: js/informacion.js rellena la tira de días y, al mover
+             la barra (o tocar un día), cambia el texto y mueve la rayita sobre la gráfica. -->
+        <section id="explora" class="tarjeta bloque-info">
+            <h2 class="titulo-bloque">🔍 Explora tu ciclo día a día</h2>
+            <p class="texto-info texto-pequeno">Mueve la barra o toca un día para ver qué está pasando.</p>
+
+            <!-- informacion.js mete aquí 28 casillas, una por día -->
+            <div id="tira-dias" class="tira-dias"></div>
+
+            <label for="selector-dia" class="oculto-visual">Elige un día del ciclo</label>
+            <input type="range" id="selector-dia" class="selector-dia" min="1" max="28" value="1">
+
+            <!-- Tarjeta con lo que pasa el día elegido. informacion.js le cambia la clase
+                 de fase (fase-regla, fase-lutea...) para que cambie de color. -->
+            <div id="info-dia" class="info-dia fase-regla" aria-live="polite">
+                <p class="dia-elegido">Día <span id="numero-dia">1</span></p>
+                <p id="fase-dia" class="fase-dia">Regla</p>
+                <p id="texto-dia" class="texto-dia"></p>
+            </div>
+
+            <!-- Gráfica de hormonas con una rayita que marca el día elegido.
+                 La rayita (marcador-dia) es un div colocado encima de la imagen:
+                 informacion.js le cambia la posición horizontal (left). -->
+            <div class="grafica-hormonas">
+                <img src="img/hormonas.svg" class="ilustracion-grafica"
+                     alt="Gráfica: el estrógeno sube antes de la ovulación, la LH tiene un pico el día 14 y la progesterona sube en la segunda mitad">
+                <div id="marcador-dia" class="marcador-dia"></div>
+            </div>
+            <div class="leyenda-hormonas">
+                <span><span class="raya raya-estrogeno"></span>Estrógeno</span>
+                <span><span class="raya raya-progesterona"></span>Progesterona</span>
+                <span><span class="raya raya-lh"></span>LH</span>
+                <span><span class="raya raya-fsh"></span>FSH</span>
+            </div>
+        </section>
+
+        <!-- ===================== 5. LAS HORMONAS ===================== -->
+        <section id="hormonas" class="tarjeta bloque-info">
+            <h2 class="titulo-bloque">⚗️ Las hormonas: quién manda</h2>
+            <p class="texto-info texto-pequeno">
+                Las hormonas son mensajeros químicos. Cuatro de ellas dirigen todo el ciclo:
+            </p>
+            <div class="lista-hormonas">
+                <div class="hormona hormona-fsh">
+                    <h3>FSH</h3>
+                    <p>Al principio del ciclo hace que crezcan los folículos del ovario.</p>
+                </div>
+                <div class="hormona hormona-estrogeno">
+                    <h3>Estrógeno</h3>
+                    <p>La fabrican los folículos. Reconstruye el endometrio y suele dar energía.</p>
+                </div>
+                <div class="hormona hormona-lh">
+                    <h3>LH</h3>
+                    <p>Sube de golpe a mitad de ciclo: ese pico es el que dispara la ovulación.</p>
+                </div>
+                <div class="hormona hormona-progesterona">
+                    <h3>Progesterona</h3>
+                    <p>Domina la segunda mitad. Prepara el útero; cuando baja, llega la regla.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===================== 6. LA OVULACIÓN Y LOS DÍAS FÉRTILES ===================== -->
+        <section id="ovulacion" class="tarjeta bloque-info">
+            <h2 class="titulo-bloque">🥚 La ovulación</h2>
+            <img src="img/ovulacion.svg" class="ilustracion"
+                 alt="El folículo maduro del ovario se abre y suelta un óvulo, que entra en la trompa de Falopio camino del útero">
+            <p class="texto-info">
+                Más o menos a mitad del ciclo, el folículo más grande se abre y suelta un
+                <strong>óvulo</strong>. La trompa de Falopio lo recoge y lo lleva hacia el útero.
+                Ocurre unos <strong>14 días antes de la siguiente regla</strong>, y por eso IZAR
+                la calcula hacia atrás desde tu próxima regla prevista.
+            </p>
+
+            <!-- Dos datos clave, en grande -->
+            <div class="datos-grid">
+                <div class="dato-tile">
+                    <span class="dato-numero">12–24 h</span>
+                    <span class="dato-texto">vive el óvulo después de salir</span>
+                </div>
+                <div class="dato-tile">
+                    <span class="dato-numero">hasta 5 días</span>
+                    <span class="dato-texto">pueden sobrevivir los espermatozoides</span>
+                </div>
+            </div>
+
+            <h3 class="subtitulo-info">Los días fértiles</h3>
+            <p class="texto-info texto-pequeno">
+                Por eso los días fértiles son sobre todo los <strong>5 anteriores</strong> a la
+                ovulación y el <strong>propio día</strong>:
+            </p>
+            <!-- Tira de días de ejemplo (del 8 al 16): verdes los fértiles, más oscuro la ovulación -->
+            <div class="ventana-fertil-dias" aria-hidden="true">
+                <span>8</span>
+                <span class="fertil">9</span>
+                <span class="fertil">10</span>
+                <span class="fertil">11</span>
+                <span class="fertil">12</span>
+                <span class="fertil">13</span>
+                <span class="fertil ovula">14</span>
+                <span>15</span>
+                <span>16</span>
+            </div>
+
+            <h3 class="subtitulo-info">Señales de que estás ovulando</h3>
+            <div class="senales">
+                <div class="senal"><span class="senal-icono">💧</span><p>Flujo <strong>transparente y elástico</strong>, como clara de huevo.</p></div>
+                <div class="senal"><span class="senal-icono">🌡️</span><p>La temperatura en reposo <strong>sube unas décimas</strong> después de ovular.</p></div>
+                <div class="senal"><span class="senal-icono">📍</span><p>A veces, un <strong>pinchazo leve</strong> a un lado de la tripa.</p></div>
+            </div>
+
+            <p class="aviso-info">
+                ⚠️ Las predicciones de IZAR son una estimación: <strong>no sirven como método anticonceptivo</strong>.
+            </p>
+        </section>
+
+        <!-- ===================== 7. SÍNTOMAS ===================== -->
+        <section id="sintomas" class="tarjeta bloque-info">
+            <h2 class="titulo-bloque">〰️ Síntomas frecuentes</h2>
+            <p class="texto-info texto-pequeno">Por qué aparecen y qué suele ayudar:</p>
+
+            <div class="sintomas-grid">
+                <div class="sintoma-card">
+                    <span class="sintoma-icono">〰️</span>
+                    <h3>Cólicos</h3>
+                    <p><strong>Por qué:</strong> el útero se contrae para soltar el endometrio.</p>
+                    <p><strong>Ayuda:</strong> calor en la tripa y moverte suave.</p>
+                </div>
+                <div class="sintoma-card">
+                    <span class="sintoma-icono">🎈</span>
+                    <h3>Hinchazón</h3>
+                    <p><strong>Por qué:</strong> las hormonas hacen retener líquido.</p>
+                    <p><strong>Ayuda:</strong> beber agua y tomar menos sal.</p>
+                </div>
+                <div class="sintoma-card">
+                    <span class="sintoma-icono">🎭</span>
+                    <h3>Cambios de ánimo</h3>
+                    <p><strong>Por qué:</strong> el estrógeno y la progesterona bajan antes de la regla.</p>
+                    <p><strong>Ayuda:</strong> descansar, hacer ejercicio, hablarlo.</p>
+                </div>
+                <div class="sintoma-card">
+                    <span class="sintoma-icono">😴</span>
+                    <h3>Cansancio</h3>
+                    <p><strong>Por qué:</strong> cambios hormonales y pérdida de hierro al sangrar.</p>
+                    <p><strong>Ayuda:</strong> dormir bien y comer alimentos con hierro.</p>
+                </div>
+                <div class="sintoma-card">
+                    <span class="sintoma-icono">💗</span>
+                    <h3>Pecho sensible</h3>
+                    <p><strong>Por qué:</strong> la progesterona de la fase lútea.</p>
+                    <p><strong>Ayuda:</strong> un sujetador cómodo.</p>
+                </div>
+                <div class="sintoma-card">
+                    <span class="sintoma-icono">🤕</span>
+                    <h3>Dolor de cabeza</h3>
+                    <p><strong>Por qué:</strong> la bajada de estrógeno antes de la regla.</p>
+                    <p><strong>Ayuda:</strong> hidratarte y descansar.</p>
+                </div>
+            </div>
+
+            <h3 class="subtitulo-info">💧 El flujo cambia durante el ciclo</h3>
+            <!-- Cuatro pasos: del final de la regla a la fase lútea -->
+            <div class="flujo-pasos">
+                <div class="flujo-paso fase-regla"><span class="flujo-cuando">Tras la regla</span><span>Poco o nada</span></div>
+                <div class="flujo-paso fase-folicular"><span class="flujo-cuando">Fase folicular</span><span>Blanco y cremoso</span></div>
+                <div class="flujo-paso fase-ovulacion"><span class="flujo-cuando">Ovulación</span><span>Transparente y elástico</span></div>
+                <div class="flujo-paso fase-lutea"><span class="flujo-cuando">Fase lútea</span><span>Espeso y pegajoso</span></div>
+            </div>
+        </section>
+
+        <!-- ===================== 8. ¿QUÉ ES NORMAL? ===================== -->
+        <section id="normal" class="tarjeta bloque-info">
+            <h2 class="titulo-bloque">✅ ¿Qué es normal?</h2>
+            <div class="datos-grid">
+                <div class="dato-tile">
+                    <span class="dato-numero">21–35</span>
+                    <span class="dato-texto">días dura un ciclo</span>
+                </div>
+                <div class="dato-tile">
+                    <span class="dato-numero">2–7</span>
+                    <span class="dato-texto">días dura la regla</span>
+                </div>
+                <div class="dato-tile">
+                    <span class="dato-numero">≈ 14</span>
+                    <span class="dato-texto">días de la ovulación a la regla</span>
+                </div>
+                <div class="dato-tile">
+                    <span class="dato-numero">2–3</span>
+                    <span class="dato-texto">cucharadas de sangre en toda la regla (unos 30–40 ml)</span>
+                </div>
+            </div>
+
+            <!-- Cuándo conviene ir al médico -->
+            <div class="consulta-medico">
+                <h3>🩺 Consulta a un médico si…</h3>
+                <ul>
+                    <li>El dolor no te deja hacer tu vida normal.</li>
+                    <li>La regla te dura más de 7 días.</li>
+                    <li>Tienes que cambiarte de compresa o tampón cada 1–2 horas.</li>
+                    <li>Tus ciclos duran a menudo menos de 21 días o más de 35.</li>
+                    <li>No te baja la regla en 3 meses (y no hay embarazo).</li>
+                    <li>Sangras entre una regla y otra.</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- ===================== 9. MITOS ===================== -->
+        <section id="mitos" class="tarjeta bloque-info">
+            <h2 class="titulo-bloque">💬 Mitos y realidades</h2>
+
+            <div class="mito-card">
+                <p class="mito">❌ «El ciclo siempre dura 28 días»</p>
+                <p class="realidad">✅ 28 es solo la media. Entre 21 y 35 días es normal.</p>
+            </div>
+            <div class="mito-card">
+                <p class="mito">❌ «Con la regla no te puedes quedar embarazada»</p>
+                <p class="realidad">✅ Es poco probable, pero posible: los espermatozoides viven hasta 5 días.</p>
+            </div>
+            <div class="mito-card">
+                <p class="mito">❌ «Con la regla no se debe hacer deporte»</p>
+                <p class="realidad">✅ Al contrario: moverse puede aliviar los cólicos.</p>
+            </div>
+            <div class="mito-card">
+                <p class="mito">❌ «Si duele muchísimo, es lo normal»</p>
+                <p class="realidad">✅ Un dolor que te frena no es normal y puede tener una causa (como la endometriosis). Consúltalo.</p>
+            </div>
+            <div class="mito-card">
+                <p class="mito">❌ «Ducharse o lavarse el pelo con la regla es malo»</p>
+                <p class="realidad">✅ Falso: la higiene de siempre es lo mejor.</p>
+            </div>
+        </section>
+
+        <!-- Aviso final -->
+        <p class="aviso-final">
+            Esta información es general y educativa. No sustituye el consejo de un profesional sanitario.
+        </p>
+
+        <!-- ===================== MENÚ LATERAL =====================
+             Escondido a la izquierda hasta que js/menu.js le pone la clase "abierto".
+             "fondo-menu" es la capa oscura de detrás: al tocarla, el menú se cierra.
+             "activo" pinta de rosa la página en la que estás. -->
+        <div id="fondo-menu" class="fondo-menu"></div>
+        <nav id="menu-lateral" class="menu-lateral" aria-label="Menú principal">
+            <div class="cabecera-menu">
+                <span class="nombre">IZAR</span>
+                <button id="cerrar-menu" class="boton-cerrar-menu" type="button" aria-label="Cerrar menú">✕</button>
+            </div>
+            <a href="principal.html" class="item-menu"><span>📝</span> Registro</a>
+            <a href="estadisticas.html" class="item-menu"><span>📊</span> Estadísticas</a>
+            <a href="calendario.html" class="item-menu"><span>📅</span> Calendario</a>
+            <a href="informacion.html" class="item-menu activo"><span>📖</span> Información</a>
+            <hr class="separador-menu">
+            <a href="ajustes.html" class="item-menu"><span>⚙️</span> Ajustes</a>
+        </nav>
+
+    </main>
+
+    <script src="js/menu.js"></script>
+    <script src="js/informacion.js"></script>
+</body>
+</html>

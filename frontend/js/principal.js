@@ -22,6 +22,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const mensaje = document.querySelector("#mensaje");
     const botonGuardar = document.querySelector("#guardar-periodo");
     const botonCancelar = document.querySelector("#cancelar-periodo");
+    // Banda de aviso cuando la regla está a punto de llegar (o hay retraso)
+    const avisoRegla = document.querySelector("#aviso-regla");
 
     // Datos que rellena cargarDashboard() y que usa la ventana:
     let periodoAbierto = false;    // ¿hay un periodo sin fin?
@@ -91,6 +93,39 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     // ---------------------------------------------------------------
+    // FUNCIÓN: muestra u oculta el aviso de "la regla está al llegar"
+    // ---------------------------------------------------------------
+    // Solo se enseña si quedan 2 días o menos, o si ya hay retraso (dias negativo).
+    // Con más de 2 días, o sin predicción todavía (dias === null), se oculta.
+    const DIAS_PARA_AVISAR = 2;
+
+    function actualizarAvisoRegla(dias) {
+        if (dias === null || dias > DIAS_PARA_AVISAR) {
+            avisoRegla.classList.add("oculto");
+            return;
+        }
+
+        avisoRegla.classList.remove("oculto");
+
+        if (dias < 0) {
+            // Retraso: estilo más urgente (rojo) y mensaje distinto
+            const retraso = Math.abs(dias);
+            avisoRegla.textContent = `⏰ Llevas ${retraso} ${retraso === 1 ? "día" : "días"} de retraso`;
+            avisoRegla.classList.add("retraso");
+        } else if (dias === 0) {
+            avisoRegla.textContent = "⏰ Tu periodo podría llegar hoy";
+            avisoRegla.classList.remove("retraso");
+        } else if (dias === 1) {
+            avisoRegla.textContent = "⏰ Tu periodo podría llegar mañana";
+            avisoRegla.classList.remove("retraso");
+        } else {
+            avisoRegla.textContent = `⏰ Tu periodo podría llegar en ${dias} días`;
+            avisoRegla.classList.remove("retraso");
+        }
+    }
+
+
+    // ---------------------------------------------------------------
     // FUNCIÓN: pide los datos a /dashboard y actualiza la pantalla
     // ---------------------------------------------------------------
     // Va en una función porque la usamos dos veces: al abrir la página
@@ -140,11 +175,15 @@ document.addEventListener("DOMContentLoaded", () => {
                     const retraso = Math.abs(dias);
                     subtituloCirculo.textContent = `Retraso de ${retraso} ${retraso === 1 ? "día" : "días"}`;
                 }
+
+                // Aviso aparte, más llamativo, cuando quedan pocos días (o hay retraso)
+                actualizarAvisoRegla(dias);
             }
             else if (datos.estado === "nuevo") {
                 // Cuenta nueva sin ningún periodo registrado
                 tituloCirculo.textContent = "¡Bienvenida!";
                 subtituloCirculo.textContent = datos.mensaje;   // "Registra tu primer periodo"
+                actualizarAvisoRegla(null);              // sin periodos no hay nada que avisar
             }
 
         } catch (error) {

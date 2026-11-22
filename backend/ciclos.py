@@ -170,8 +170,9 @@ def obtener_sintomas_del_ciclo(ciclo, sintomas) -> list:
             # Día del ciclo: días desde el inicio hasta la fecha, +1 (el inicio es el "día 1")
             diferencia = calcular_diferencia(ciclo["inicio"], sintoma["fecha"]) + 1
             sintoma_ciclo = {
-                "dia": diferencia,              # en qué día del ciclo pasó
-                "sintoma": sintoma["sintoma"]   # qué síntoma fue
+                "dia": diferencia,                    # en qué día del ciclo pasó
+                "sintoma": sintoma["sintoma"],        # qué síntoma fue
+                "intensidad": sintoma["intensidad"]   # con qué intensidad (bd.py ya la guarda y la devuelve)
             }
             sintomas_ciclo.append(sintoma_ciclo)
 
@@ -207,6 +208,38 @@ def aparece_en_ciclo(sintomas_ciclo, nombre, dia) -> bool:
     return False                                # hemos mirado todos y no estaba
 
 
+# FUNCIÓN 5E-bis: como la 5E, pero en vez de True/False devuelve la intensidad encontrada.
+#
+# Misma idea que aparece_en_ciclo, pero aquí no nos basta con saber SI aparece:
+# también queremos saber CÓMO fue (intenso/suave, mucho/poco...), para poder
+# avisar de la intensidad más probable, no solo del síntoma.
+def intensidad_en_ciclo(sintomas_ciclo, nombre, dia) -> str:
+    """Devuelve la intensidad de un síntoma si aparece cerca de un día dado en UN ciclo, o None si no aparece."""
+    for sintoma in sintomas_ciclo:
+        es_el_sintoma = sintoma["sintoma"] == nombre
+        esta_cerca = dia - VENTANA_DIAS <= sintoma["dia"] <= dia + VENTANA_DIAS
+        if es_el_sintoma and esta_cerca:
+            return sintoma["intensidad"]        # encontrado: devolvemos con qué intensidad fue
+    return None                                 # no apareció en este ciclo
+
+
+# FUNCIÓN: de una lista de intensidades (una por cada ciclo en que apareció el síntoma),
+# devuelve la que más se repite. Por ejemplo, de ["intenso", "suave", "intenso"] -> "intenso".
+def intensidad_mas_comun(intensidades) -> str:
+    """Devuelve la intensidad que más veces se repite en una lista de intensidades."""
+    conteo = {}                                 # cuántas veces aparece cada intensidad
+    for intensidad in intensidades:
+        conteo[intensidad] = conteo.get(intensidad, 0) + 1
+
+    mas_comun = None
+    veces_maximo = 0
+    for intensidad, veces in conteo.items():
+        if veces > veces_maximo:
+            veces_maximo = veces
+            mas_comun = intensidad
+    return mas_comun
+
+
 # FUNCIÓN 5F: síntomas que es probable que tenga HOY, según sus ciclos anteriores
 #
 # La idea: imagina una libreta por cada ciclo terminado. Para cada síntoma
@@ -217,14 +250,15 @@ def aparece_en_ciclo(sintomas_ciclo, nombre, dia) -> bool:
 #   - dia: el día del ciclo de hoy (el de calcular_dia_actual_ciclo)
 #   - periodos: la lista de periodos (de bd.obtener_periodos)
 #   - sintomas: la lista de síntomas (de bd.obtener_sintomas)
-# Devuelve una lista de nombres, por ejemplo ["colicos", "sueno"],
+# Devuelve una lista de diccionarios {"sintoma": nombre, "intensidad": intensidad_mas_comun},
+# por ejemplo [{"sintoma": "colicos", "intensidad": "intenso"}, {"sintoma": "sueno", "intensidad": "poco"}],
 # o [] si todavía no hay ciclos terminados con síntomas (por ejemplo, en el primer ciclo).
 #
 # Ejemplo: hoy es el día 2 y hay 2 ciclos con síntomas.
-#   Ciclo 1: cólicos el día 2.     Ciclo 2: cólicos el día 3 y sueño el día 20.
-#   - colicos: aparece en los 2 ciclos (2 de 2 = 100 %) -> SÍ
+#   Ciclo 1: cólicos (intenso) el día 2.     Ciclo 2: cólicos (suave) el día 3 y sueño el día 20.
+#   - colicos: aparece en los 2 ciclos (2 de 2 = 100 %) -> SÍ, con intensidad "intenso" (la más repetida)
 #   - sueno:   el día 20 queda lejos del 2 (0 de 2 = 0 %) -> NO
-#   Resultado: ["colicos"]
+#   Resultado: [{"sintoma": "colicos", "intensidad": "intenso"}]
 PORCENTAJE_MINIMO = 0.5     # 0.5 = la mitad de los ciclos
 
 def calcular_sintomas_posibles(dia, periodos, sintomas) -> list:
@@ -248,21 +282,29 @@ def calcular_sintomas_posibles(dia, periodos, sintomas) -> list:
         return []
 
     # --- PARTE 2: contar en cuántos ciclos aparece cada síntoma cerca de hoy ---
+    # Y de paso, apuntar CON QUÉ INTENSIDAD apareció cada vez, para poder
+    # avisar también de la intensidad más probable (no solo del síntoma).
     posibles = []
 
     for nombre in SINTOMAS_VALIDOS:             # colicos, flujo, animo, sueno
         veces = 0                               # en cuántos ciclos ha aparecido este síntoma
+        intensidades_encontradas = []           # una intensidad por cada ciclo en que apareció
 
         for sintomas_ciclo in ciclos_con_sintomas:      # miramos ciclo por ciclo ("libreta" a libreta)
             # Cada ciclo suma COMO MUCHO 1: si tuvo cólicos los días 2 y 3,
-            # ese ciclo cuenta una sola vez (por eso usamos la 5E, que dice sí o no).
-            if aparece_en_ciclo(sintomas_ciclo, nombre, dia):
+            # ese ciclo cuenta una sola vez (función 5E-bis: devuelve la intensidad, o None).
+            intensidad = intensidad_en_ciclo(sintomas_ciclo, nombre, dia)
+            if intensidad is not None:
                 veces += 1
+                intensidades_encontradas.append(intensidad)
 
         # Proporción de ciclos en los que apareció: 2 de 2 = 1.0 (100 %), 1 de 2 = 0.5 (50 %)...
         proporcion = veces / len(ciclos_con_sintomas)
         if proporcion >= PORCENTAJE_MINIMO:
-            posibles.append(nombre)
+            posibles.append({
+                "sintoma": nombre,
+                "intensidad": intensidad_mas_comun(intensidades_encontradas)
+            })
 
     return posibles
 

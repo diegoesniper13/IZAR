@@ -15,6 +15,20 @@ const SINTOMAS_VISIBLES = {
     sueno:   { emoji: "💤", texto: "Sueño" }
 };
 
+// Cómo se ve cada intensidad. Las claves son los valores que guarda la base de datos
+// (INTENSIDADES_VALIDAS de ciclos.py); tiene que ser el mismo texto que usa principal.js
+// (OPCIONES_INTENSIDAD) para que la usuaria vea siempre la misma palabra.
+const INTENSIDADES_VISIBLES = {
+    intenso: "Intenso",
+    suave: "Suave",
+    mucho: "Mucho",
+    normal: "Normal",
+    poco: "Poco",
+    feliz: "Feliz",
+    enfadada: "Enfadada",
+    triste: "Triste"
+};
+
 // Esperamos a que el HTML esté cargado antes de tocar nada
 document.addEventListener("DOMContentLoaded", async () => {
 
@@ -95,21 +109,24 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 
     // ---------------------------------------------------------------
-    // FUNCIÓN: pinta una "pastilla" por cada síntoma posible
+    // FUNCIÓN: pinta una "pastilla" por cada síntoma posible, con su intensidad más común
     // ---------------------------------------------------------------
-    // Recibe la lista que manda el servidor, por ejemplo ["colicos", "sueno"]
+    // Recibe la lista que manda el servidor, por ejemplo:
+    //   [{sintoma: "colicos", intensidad: "intenso"}, {sintoma: "sueno", intensidad: "poco"}]
     function mostrarSintomas(sintomas) {
         listaSintomas.innerHTML = "";               // quitamos el "Cargando..."
 
         // forEach recorre la lista: una pastilla por síntoma
-        sintomas.forEach((nombre) => {
+        sintomas.forEach((item) => {
             // Si llegara un nombre que no conocemos, lo enseñamos tal cual (sin emoji)
-            const visible = SINTOMAS_VISIBLES[nombre] || { emoji: "•", texto: nombre };
+            const visible = SINTOMAS_VISIBLES[item.sintoma] || { emoji: "•", texto: item.sintoma };
+            // Igual con la intensidad: si no la reconocemos, la enseñamos tal cual
+            const intensidadVisible = INTENSIDADES_VISIBLES[item.intensidad] || item.intensidad;
 
-            // Creamos <span class="pastilla pastilla-activa">〰️ Cólicos</span>
+            // Creamos <span class="pastilla pastilla-activa">〰️ Cólicos (Intenso)</span>
             const pastilla = document.createElement("span");
             pastilla.className = "pastilla pastilla-activa";
-            pastilla.textContent = `${visible.emoji} ${visible.texto}`;
+            pastilla.textContent = `${visible.emoji} ${visible.texto} (${intensidadVisible})`;
             listaSintomas.appendChild(pastilla);
         });
     }
