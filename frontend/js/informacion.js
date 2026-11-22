@@ -7,9 +7,18 @@
 
 const DIAS_CICLO = 28;
 
-// Días fértiles del ejemplo: los 5 antes de la ovulación (día 14) y el propio día
-const PRIMER_DIA_FERTIL = 9;
+// Días fértiles del ejemplo: igual que ventana_fertil de ciclos.py,
+// 4 días antes de la ovulación (día 14), el propio día y el día siguiente: del 10 al 15
+const PRIMER_DIA_FERTIL = 10;
 const DIA_OVULACION = 14;
+const ULTIMO_DIA_FERTIL = 15;
+
+// ---------------------------------------------------------------
+// FUNCIÓN: ¿es fértil este día? (true / false)
+// ---------------------------------------------------------------
+function esFertil(dia) {
+    return dia >= PRIMER_DIA_FERTIL && dia <= ULTIMO_DIA_FERTIL;
+}
 
 // ---------------------------------------------------------------
 // FUNCIÓN: a qué fase pertenece un día. Devuelve la clase CSS y el nombre visible.
@@ -46,6 +55,9 @@ function textoDelDia(dia) {
     if (dia === DIA_OVULACION) {
         return "¡Ovulación! Un pico de LH hace que el ovario suelte un óvulo. Es el día más fértil del ciclo.";
     }
+    if (dia === ULTIMO_DIA_FERTIL) {
+        return "Empieza la fase lútea, pero todavía es un día fértil: el óvulo puede vivir unas horas más y el flujo sigue siendo transparente.";
+    }
     if (dia <= 21) {
         return "El folículo vacío se convierte en el cuerpo lúteo y fabrica progesterona, que engorda el endometrio.";
     }
@@ -80,7 +92,7 @@ document.addEventListener("DOMContentLoaded", () => {
         casilla.type = "button";
         casilla.className = `celda-dia ${faseDelDia(dia).clase}`;
         // Los días fértiles llevan una rayita verde debajo (clase "fertil")
-        if (dia >= PRIMER_DIA_FERTIL && dia <= DIA_OVULACION) {
+        if (esFertil(dia)) {
             casilla.classList.add("fertil");
         }
         casilla.textContent = dia;
@@ -101,8 +113,9 @@ document.addEventListener("DOMContentLoaded", () => {
         // Textos de la tarjeta
         numeroDia.textContent = dia;
         faseDia.textContent = fase.nombre;
-        if (dia >= PRIMER_DIA_FERTIL && dia < DIA_OVULACION) {
-            faseDia.textContent += " · días fértiles";
+        // Los días fértiles (menos la ovulación, que ya lo dice su nombre) lo añaden al título
+        if (esFertil(dia) && dia !== DIA_OVULACION) {
+            faseDia.textContent += " · día fértil";
         }
         textoDia.textContent = textoDelDia(dia);
 
