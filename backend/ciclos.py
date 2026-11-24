@@ -36,8 +36,9 @@ def calcular_tiempo_entre_periodos(periodos) -> list:
         periodo_actual = periodos[i]                # el periodo en la posición i
         periodo_siguiente = periodos[i + 1]         # el que viene después
         tiempo_pasado = periodo_siguiente["inicio"] - periodo_actual["inicio"]
-        # .days saca el número de días y .append lo añade al final de la lista
-        dias_entre_periodos.append(tiempo_pasado.days)
+        if tiempo_pasado.days <= DIAS_MAXIMOS_CICLO:
+            # .days saca el número de días y .append lo añade al final de la lista
+            dias_entre_periodos.append(tiempo_pasado.days)
 
     return dias_entre_periodos
 
@@ -68,6 +69,8 @@ def predecir_proximo_periodo(periodos) -> date:
 
     # Primero sacamos la lista de días entre periodos (función 2)...
     tiempo_entre_periodos = calcular_tiempo_entre_periodos(periodos)
+    if tiempo_entre_periodos == []:
+        return None
     # ...y con esa lista calculamos la media (función 3)
     media = media_de_periodo(tiempo_entre_periodos)
 
