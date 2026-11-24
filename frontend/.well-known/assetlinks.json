@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "com.izar.app",
+        "sha256_cert_fingerprints": ["40:77:EC:3C:82:EC:90:E4:F1:08:82:E7:B5:B0:78:AE:AA:86:83:2D:27:90:9B:35:20:56:61:6B:33:64:07:F5"]
+      }
+    }]
