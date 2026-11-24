@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sin conexión - IZAR</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <!-- Página que enseña el service worker (sw.js) si abres la app sin internet.
+         Se queda guardada en el móvil, así que tiene que funcionar sola:
+         por eso las rutas empiezan por "/" y no usa JavaScript. -->
+    <main class="caja">
+        <div class="marca marca-grande">
+            <img src="/img/iconos/icono-192.png" class="icono-offline" alt="">
+        </div>
+
+        <h1 class="titulo titulo-centrado">Sin conexión</h1>
+        <p class="lema">
+            IZAR necesita internet para cargar tus periodos y tus predicciones.
+            Comprueba la conexión y vuelve a intentarlo.
+        </p>
+
+        <!-- Un enlace normal (sin JavaScript): vuelve a abrir la app -->
+        <a class="boton boton-principal" href="/">Reintentar</a>
+    </main>
+</body>
+</html>

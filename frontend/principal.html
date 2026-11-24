@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Principal - IZAR</title>
     <link rel="stylesheet" href="css/styles.css">
+    <!-- PWA (para poder instalar IZAR como app): manifest con nombre e iconos, color de la barra del móvil e icono -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#F06292">
+    <link rel="icon" type="image/png" href="/img/iconos/icono-192.png">
+    <link rel="apple-touch-icon" href="/img/iconos/apple-touch-icon.png">
 </head>
 <body>
     <!-- "caja" da el ancho de móvil y "aplicacion" la distribución interna de la pantalla -->
@@ -150,5 +155,7 @@
 
     <script src="js/menu.js"></script>
     <script src="js/principal.js"></script>
+    <!-- Registra el service worker (sw.js): necesario para que se pueda instalar como app -->
+    <script src="js/pwa.js"></script>
 </body>
 </html>

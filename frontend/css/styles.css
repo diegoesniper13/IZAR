@@ -1636,3 +1636,17 @@ body.sin-scroll {
 .cabecera-flotante.escondida {
     transform: translateY(-110%);
 }
+
+/* =========================================
+   PÁGINA SIN CONEXIÓN (offline.html)
+   ========================================= */
+.icono-offline {
+    width: 96px;
+    height: 96px;
+    border-radius: 22px;           /* esquinas redondeadas, como un icono de app */
+    box-shadow: 0 6px 18px rgba(240, 98, 146, 0.25);
+}
+.titulo-centrado {
+    text-align: center;
+    margin-bottom: 12px;
+}
