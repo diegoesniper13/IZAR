@@ -11,10 +11,14 @@
          Los dibujos son archivos .svg de la carpeta img/ (dibujos hechos con código:
          se ven nítidos a cualquier tamaño y pesan muy poco).
          Lo único que se mueve es la sección "Explora tu ciclo", que controla js/informacion.js. -->
-    <main class="caja aplicacion">
+    <!-- "pagina-larga": deja que la cabecera se quede pegada arriba al hacer scroll (ver styles.css) -->
+    <main class="caja aplicacion pagina-larga">
 
-        <!-- ===================== CABECERA: menú, logo y ajustes ===================== -->
-        <header class="cabecera-app">
+        <!-- ===================== CABECERA: menú, logo y ajustes =====================
+             "cabecera-flotante": se queda pegada arriba de la pantalla. Al bajar se esconde
+             y al subir un poco vuelve a salir (lo controla js/informacion.js), para poder
+             abrir el menú sin tener que volver hasta arriba del todo. -->
+        <header id="cabecera" class="cabecera-app cabecera-flotante">
             <!-- Botón ☰: abre el menú lateral (lo controla js/menu.js) -->
             <button id="abrir-menu" class="boton-menu" type="button" aria-label="Abrir menú"
                     aria-expanded="false" aria-controls="menu-lateral">

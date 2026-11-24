@@ -1574,3 +1574,38 @@ body.sin-scroll {
     clip: rect(0 0 0 0);
     white-space: nowrap;
 }
+
+/* =========================================
+   CABECERA FLOTANTE (página de Información)
+   Se queda pegada arriba; js/informacion.js la esconde al bajar
+   y la vuelve a enseñar al subir un poco.
+   ========================================= */
+
+/* La caja normal corta lo que sobresale (overflow: hidden), y eso impide que algo
+   se quede "pegado" al hacer scroll. En las páginas largas lo dejamos visible. */
+.pagina-larga {
+    overflow: visible;
+}
+
+.cabecera-flotante {
+    position: sticky;            /* se comporta normal hasta llegar arriba, y ahí se queda pegada */
+    top: 0;
+    z-index: 10;                 /* por encima del contenido (el menú lateral va aún más arriba) */
+    /* Ocupa todo el ancho de la caja: los -20px compensan el padding de .aplicacion */
+    margin: -20px -20px 20px;
+    padding: 14px 20px;
+    background-color: #FAFAFA;   /* mismo fondo que la caja: el texto no se ve por detrás */
+    border-radius: 16px 16px 0 0;
+    transition: transform 0.25s ease, box-shadow 0.25s;
+}
+
+/* Cuando ya has bajado: sombrita para que se note que flota encima del contenido */
+.cabecera-flotante.flotando {
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+    border-radius: 0 0 16px 16px;
+}
+
+/* Escondida: la subimos su propia altura (y un poco más, para que no asome la sombra) */
+.cabecera-flotante.escondida {
+    transform: translateY(-110%);
+}

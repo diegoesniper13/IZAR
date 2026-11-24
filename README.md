@@ -8,6 +8,7 @@ Aplicación web para registrar el ciclo menstrual, anticipar el próximo periodo
 
 ## Funcionalidades
 
+- **Menú lateral**: el botón ☰ de arriba abre un menú que se desliza desde la izquierda, con todas las pantallas (Registro, Estadísticas, Calendario, Información y Ajustes).
 - **Cuentas de usuario**: registro e inicio de sesión. Las contraseñas se guardan cifradas (hash), nunca tal cual. Al registrarse hay que aceptar los **términos y condiciones** y la **política de privacidad**.
 - **Pantalla de registro**:
   - el día del ciclo en el que estás;
@@ -20,10 +21,14 @@ Aplicación web para registrar el ciclo menstrual, anticipar el próximo periodo
   - periodos en curso: se guarda el inicio y se termina más tarde.
 - **Pantalla de estadísticas**:
   - tus 5 últimos periodos con su duración;
-  - los síntomas que es posible que tengas hoy, según los que registraste en tus ciclos anteriores.
+  - los síntomas que es posible que tengas hoy, con su intensidad más habitual (por ejemplo, «Cólicos (Intenso)»), según los que registraste en tus ciclos anteriores.
 - **Calendario**:
   - vista mensual con flechas para cambiar de mes;
   - pinta los días de regla ya registrada, la regla prevista, la ovulación y la ventana de días fértiles.
+- **Información**:
+  - página con dibujos propios que explica qué es la regla, las fases del ciclo, las hormonas, la ovulación y los días fértiles, los síntomas frecuentes, cómo cambia el flujo, qué es normal, cuándo ir al médico y algunos mitos;
+  - sección interactiva «Explora tu ciclo día a día»: con una barra eliges un día y ves en qué fase estás y cómo van las hormonas;
+  - la cabecera se esconde al bajar y vuelve a salir al subir un poco, para abrir el menú sin volver arriba del todo.
 - **Pantalla de ajustes**:
   - ver el usuario de la cuenta;
   - cambiar la contraseña;
@@ -39,11 +44,11 @@ Aplicación web para registrar el ciclo menstrual, anticipar el próximo periodo
 
 ### Cómo se predicen los síntomas
 
-Cada síntoma se guarda con su fecha e intensidad. Para comparar ciclos, la app traduce la fecha a **día del ciclo** (día 1 = el día que empieza la regla). Después mira, en los ciclos ya terminados, si ese síntoma apareció cerca del día de hoy (un día antes o después). Si pasó en al menos la mitad de los ciclos, lo muestra como posible. (La intensidad, de momento, solo se guarda y se muestra: no influye todavía en esta predicción.)
+Cada síntoma se guarda con su fecha e intensidad. Para comparar ciclos, la app traduce la fecha a **día del ciclo** (día 1 = el día que empieza la regla). Después mira, en los ciclos ya terminados, si ese síntoma apareció cerca del día de hoy (un día antes o después). Si pasó en al menos la mitad de los ciclos, lo muestra como posible, junto con la intensidad que más se repitió esos días.
 
 ### Cómo se calcula la ovulación y la ventana fértil
 
-La ovulación no se calcula hacia delante desde que acaba la regla (esa primera mitad del ciclo varía mucho de una persona a otra), sino **hacia atrás desde la próxima regla prevista**: la segunda mitad del ciclo, de la ovulación a la siguiente regla, es mucho más estable (~14 días). La ventana fértil son los días alrededor de esa fecha, antes y después.
+La ovulación no se calcula hacia delante desde que acaba la regla (esa primera mitad del ciclo varía mucho de una persona a otra), sino **hacia atrás desde la próxima regla prevista**: la segunda mitad del ciclo, de la ovulación a la siguiente regla, es mucho más estable (~14 días). La ventana fértil va de **4 días antes** de la ovulación hasta **1 día después**: los espermatozoides pueden sobrevivir varios días esperando al óvulo, y el óvulo todavía vive unas horas después de salir.
 
 ## Seguridad
 
@@ -85,11 +90,15 @@ IZAR/
     ├── principal.html    # pantalla de registro (ciclo, periodos y síntomas)
     ├── estadisticas.html # últimos periodos y síntomas posibles
     ├── calendario.html   # calendario mensual con predicción
+    ├── informacion.html  # explicación visual del ciclo (fases, hormonas, ovulación, síntomas...)
     ├── ajustes.html      # cuenta: contraseña, cerrar sesión, eliminar cuenta
-    ├── terminos.html      # términos y condiciones
-    ├── privacidad.html    # política de privacidad
+    ├── terminos.html     # términos y condiciones
+    ├── privacidad.html   # política de privacidad
     ├── css/styles.css
-    └── js/  # login.js, registro.js, principal.js, estadisticas.js, calendario.js, ajustes.js
+    ├── img/  # dibujos SVG de la página de información
+    └── js/   # una por pantalla (login.js, registro.js, principal.js, estadisticas.js,
+              # calendario.js, ajustes.js, informacion.js) y dos compartidas:
+              # menu.js (menú lateral) y volver.js (botón «Volver» de las páginas legales)
 ```
 
 ## Cómo ejecutarlo en tu ordenador
@@ -178,7 +187,10 @@ Con la cuenta gratuita hay que renovar la web una vez al mes (pestaña **Web** �
 - [x] Política de privacidad y consentimiento en el registro
 - [x] Cambiar contraseña y eliminar la cuenta
 - [x] Calendario con regla prevista, ovulación y ventana fértil
-- [ ] Que la intensidad de los síntomas influya también en la predicción
+- [x] La predicción de síntomas enseña también su intensidad más habitual
+- [x] Menú lateral
+- [x] Página de información con dibujos y sección interactiva
+- [ ] Editar o borrar un periodo mal registrado
 - [ ] Direcciones sin `.html` (por ejemplo, `/principal`)
 - [ ] Que la predicción ignore los meses sin registrar
 - [ ] Versión instalable (PWA) y app para Android (APK)

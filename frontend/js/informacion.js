@@ -138,4 +138,46 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // 4. Al cargar la página enseñamos el día 1
     mostrarDia(1);
+
+
+    // ---------------------------------------------------------------
+    // CABECERA FLOTANTE: se esconde al bajar y vuelve a salir al subir un poco
+    // ---------------------------------------------------------------
+    const cabecera = document.querySelector("#cabecera");
+    const menu = document.querySelector("#menu-lateral");
+
+    // Hasta dónde se puede bajar desde arriba sin que se esconda (en píxeles)
+    const ZONA_ARRIBA = 80;
+    // Cuánto hay que moverse para que cuente: así no "parpadea" con movimientos mínimos
+    const MOVIMIENTO_MINIMO = 6;
+
+    let posicionAnterior = window.scrollY;     // dónde estaba el scroll la última vez
+
+    window.addEventListener("scroll", () => {
+        const posicion = window.scrollY;       // cuántos píxeles hemos bajado desde arriba
+        const diferencia = posicion - posicionAnterior;   // > 0 bajando, < 0 subiendo
+
+        // Si el menú lateral está abierto, no tocamos nada
+        if (menu.classList.contains("abierto")) {
+            return;
+        }
+
+        if (posicion < ZONA_ARRIBA) {
+            // Arriba del todo: cabecera visible y sin sombra (como en las demás páginas)
+            cabecera.classList.remove("escondida", "flotando");
+        } else if (diferencia > MOVIMIENTO_MINIMO) {
+            // Bajando: la escondemos para dejar sitio al contenido
+            cabecera.classList.add("escondida");
+        } else if (diferencia < -MOVIMIENTO_MINIMO) {
+            // Subiendo un poco: aparece, con sombra porque flota encima del texto
+            cabecera.classList.remove("escondida");
+            cabecera.classList.add("flotando");
+        } else {
+            // Movimiento muy pequeño: no cambiamos nada ni actualizamos la posición,
+            // así los pasitos pequeños se van sumando hasta llegar al mínimo
+            return;
+        }
+
+        posicionAnterior = posicion;
+    }, { passive: true });   // passive: avisa al navegador de que no bloqueamos el scroll (va más fluido)
 });

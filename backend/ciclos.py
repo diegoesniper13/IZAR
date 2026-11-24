@@ -337,31 +337,37 @@ def obtener_ultimos_periodos(periodos, cantidad=5) -> list:
 
 
 def obtener_ovulacion(periodos)->date:
-    """Devuelve el dia aproximado de la ovulacion"""
+    """Devuelve el día aproximado de la ovulación: 14 días antes de la próxima regla prevista, o None si aún no hay predicción."""
+    # Se calcula hacia ATRÁS desde la próxima regla porque la fase lútea
+    # (de la ovulación a la regla) dura casi siempre unos 14 días
     proximo_periodo = predecir_proximo_periodo(periodos)
-    if proximo_periodo == None:
-        return None        
+    if proximo_periodo == None:            # sin predicción (menos de 2 periodos) no hay ovulación
+        return None
     return proximo_periodo - timedelta(days=14)
 
 
 def duracion_media_periodo(periodos)->int:
-    suma_total:int = 0
-    contador: int = 0
+    """Devuelve cuántos días suele durar la regla (media de los periodos terminados), o None si no hay ninguno terminado."""
+    suma_total:int = 0                     # días de regla sumando todos los periodos terminados
+    contador: int = 0                      # cuántos periodos terminados hemos sumado
     for periodo in periodos:
-        if periodo["fin"] != None: 
+        if periodo["fin"] != None:         # el periodo en curso no cuenta: aún no sabemos cuánto durará
             inicio = periodo["inicio"]
             fin = periodo["fin"]
+            # +1 porque se cuentan los dos extremos: del lunes al viernes son 5 días, no 4
             duracion: int = calcular_diferencia(inicio,fin) + 1
             suma_total += duracion
             contador += 1
-    if contador == 0:
+    if contador == 0:                      # ningún periodo terminado: no se puede hacer media
         return None
-    return round(suma_total / contador)
+    return round(suma_total / contador)    # media redondeada a días enteros
 
 
 def ventana_fertil(ovulacion)->dict:
-    """Calcula los dias en los que puede estar fertil"""
-    if ovulacion == None:
+    """Devuelve los días fértiles alrededor de la ovulación ({"inicio": fecha, "fin": fecha}), o None si no hay ovulación."""
+    # 4 días antes: los espermatozoides pueden sobrevivir varios días esperando al óvulo.
+    # 1 día después: el óvulo todavía vive unas horas y el flujo fértil no desaparece de golpe.
+    if ovulacion == None:                  # sin ovulación calculada no hay ventana
         return None
     ventana:dict = {
         "inicio": ovulacion - timedelta(days=4),
