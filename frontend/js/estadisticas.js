@@ -4,6 +4,7 @@
 //   - pone el día del ciclo de hoy
 //   - enseña los síntomas que es posible que tenga hoy (función 5F de ciclos.py)
 //   - enseña sus 5 últimos periodos (función 5G de ciclos.py)
+//   - deja eliminar un periodo (papelera de cada fila -> POST /periodo/borrar)
 // Todo sale de la misma ruta: /dashboard.
 
 // Cómo se enseña cada síntoma. Las claves son los nombres que guarda la base de datos
@@ -36,6 +37,17 @@ document.addEventListener("DOMContentLoaded", async () => {
     const listaSintomas = document.querySelector("#lista-sintomas");
     const explicacion = document.querySelector("#explicacion-sintomas");
     const listaPeriodos = document.querySelector("#lista-periodos");
+    const mensajePeriodos = document.querySelector("#mensaje-periodos");
+
+    // Ventana de "¿Eliminar este periodo?"
+    const ventanaEliminar = document.querySelector("#ventana-eliminar");
+    const textoEliminar = document.querySelector("#texto-eliminar");
+    const botonConfirmar = document.querySelector("#confirmar-eliminar");
+    const botonCancelar = document.querySelector("#cancelar-eliminar");
+
+    // El periodo que se va a borrar: lo guardamos al pulsar la papelera
+    // y lo usamos cuando se pulsa ELIMINAR en la ventana
+    let periodoAEliminar = null;
 
 
     // ---------------------------------------------------------------
@@ -89,8 +101,24 @@ document.addEventListener("DOMContentLoaded", async () => {
                 duracion.textContent = `${periodo.duracion} ${periodo.duracion === 1 ? "día" : "días"}`;
             }
 
+            //   <button class="boton-eliminar-periodo">🗑️</button>
+            const botonEliminar = document.createElement("button");
+            botonEliminar.type = "button";
+            botonEliminar.className = "boton-eliminar-periodo";
+            botonEliminar.textContent = "🗑️";
+            // Para lectores de pantalla: el icono solo no dice qué hace
+            botonEliminar.setAttribute("aria-label", `Eliminar el periodo que empezó el ${diaYMes(periodo.inicio)}`);
+            // Al pulsarla no se borra todavía: primero se pregunta
+            botonEliminar.addEventListener("click", () => pedirConfirmacion(periodo));
+
+            // La duración y la papelera van juntas a la derecha de la fila
+            const derecha = document.createElement("span");
+            derecha.className = "derecha-periodo";
+            derecha.appendChild(duracion);
+            derecha.appendChild(botonEliminar);
+
             fila.appendChild(fechas);
-            fila.appendChild(duracion);
+            fila.appendChild(derecha);
             listaPeriodos.appendChild(fila);
         });
     }
@@ -132,48 +160,131 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
 
-    try {
-        // Pedimos los datos a la misma ruta que usa la pantalla principal
-        const respuesta = await fetch("/dashboard");
+    // ---------------------------------------------------------------
+    // FUNCIÓN: pide los datos a /dashboard y pinta toda la pantalla
+    // ---------------------------------------------------------------
+    // Está en una función para poder llamarla dos veces: al abrir la página
+    // y después de eliminar un periodo (para que la lista y las predicciones se actualicen).
+    async function cargarEstadisticas() {
+        try {
+            // Pedimos los datos a la misma ruta que usa la pantalla principal
+            const respuesta = await fetch("/dashboard");
 
-        // 401 = no hay sesión: a iniciar sesión
-        if (respuesta.status === 401) {
-            window.location.href = "login.html";
-            return;
+            // 401 = no hay sesión: a iniciar sesión
+            if (respuesta.status === 401) {
+                window.location.href = "login.html";
+                return;
+            }
+
+            const datos = await respuesta.json();
+
+            // CUENTA NUEVA (o se han borrado todos los periodos): no hay nada que enseñar
+            if (datos.estado === "nuevo") {
+                mostrarTextoVacio("Registra tu primer periodo para empezar");
+                explicacion.textContent = "";
+                numeroDiaCiclo.textContent = "–";
+                mostrarPeriodos([]);
+                return;
+            }
+
+            // ÚLTIMOS PERIODOS
+            mostrarPeriodos(datos.ultimos_periodos);
+
+            // DÍA DEL CICLO
+            numeroDiaCiclo.textContent = datos.dia_ciclo;
+
+            // SÍNTOMAS POSIBLES
+            const sintomas = datos.sintomas_posibles;
+            if (sintomas.length > 0) {
+                mostrarSintomas(sintomas);
+                explicacion.textContent = "Según los síntomas que registraste estos días en tus ciclos anteriores.";
+            } else {
+                // Lista vacía: o no hay datos suficientes todavía, o no suele tener nada estos días.
+                // El servidor no distingue los dos casos, así que lo explicamos con un texto que vale para ambos.
+                mostrarTextoVacio("Nada destacable para hoy");
+                explicacion.textContent = "Las predicciones aparecen cuando tienes al menos un ciclo completo con síntomas registrados.";
+            }
+
+        } catch (error) {
+            // Servidor apagado o fallo de conexión
+            console.error("Error de conexión:", error);
+            mostrarTextoVacio("No se pudo conectar con el servidor");
+            listaPeriodos.innerHTML = "";
         }
-
-        const datos = await respuesta.json();
-
-        // CUENTA NUEVA: todavía no hay ningún periodo registrado
-        if (datos.estado === "nuevo") {
-            mostrarTextoVacio("Registra tu primer periodo para empezar");
-            explicacion.textContent = "";
-            mostrarPeriodos([]);
-            return;
-        }
-
-        // ÚLTIMOS PERIODOS
-        mostrarPeriodos(datos.ultimos_periodos);
-
-        // DÍA DEL CICLO
-        numeroDiaCiclo.textContent = datos.dia_ciclo;
-
-        // SÍNTOMAS POSIBLES
-        const sintomas = datos.sintomas_posibles;
-        if (sintomas.length > 0) {
-            mostrarSintomas(sintomas);
-            explicacion.textContent = "Según los síntomas que registraste estos días en tus ciclos anteriores.";
-        } else {
-            // Lista vacía: o no hay datos suficientes todavía, o no suele tener nada estos días.
-            // El servidor no distingue los dos casos, así que lo explicamos con un texto que vale para ambos.
-            mostrarTextoVacio("Nada destacable para hoy");
-            explicacion.textContent = "Las predicciones aparecen cuando tienes al menos un ciclo completo con síntomas registrados.";
-        }
-
-    } catch (error) {
-        // Servidor apagado o fallo de conexión
-        console.error("Error de conexión:", error);
-        mostrarTextoVacio("No se pudo conectar con el servidor");
-        listaPeriodos.innerHTML = "";
     }
+
+
+    // ---------------------------------------------------------------
+    // FUNCIÓN: abre la ventana de "¿Eliminar este periodo?"
+    // ---------------------------------------------------------------
+    function pedirConfirmacion(periodo) {
+        periodoAEliminar = periodo;                 // nos lo apuntamos para cuando pulse ELIMINAR
+        const textoFin = periodo.fin ? diaYMes(periodo.fin) : "ahora (en curso)";
+        textoEliminar.textContent = `Del ${diaYMes(periodo.inicio)} al ${textoFin}. Esta acción no se puede deshacer.`;
+        botonConfirmar.disabled = false;
+        ventanaEliminar.showModal();
+    }
+
+    // CANCELAR: cierra la ventana sin borrar nada
+    botonCancelar.addEventListener("click", () => {
+        periodoAEliminar = null;
+        ventanaEliminar.close();
+    });
+
+
+    // ---------------------------------------------------------------
+    // ELIMINAR: manda el periodo a POST /periodo/borrar
+    // ---------------------------------------------------------------
+    // Le mandamos la fecha de inicio, por ejemplo {"inicio": "2026-11-04"}.
+    // Sirve para saber qué periodo es porque dos periodos de la misma
+    // usuaria nunca pueden empezar el mismo día (no se pueden solapar).
+    botonConfirmar.addEventListener("click", async () => {
+        if (periodoAEliminar === null) {
+            return;
+        }
+
+        // Desactivamos el botón para que no se pueda pulsar dos veces mientras espera
+        botonConfirmar.disabled = true;
+        mensajePeriodos.textContent = "";
+        mensajePeriodos.classList.remove("error");
+
+        try {
+            const respuesta = await fetch("/periodo/borrar", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ inicio: periodoAEliminar.inicio })
+            });
+
+            // 401 = la sesión ha caducado
+            if (respuesta.status === 401) {
+                window.location.href = "login.html";
+                return;
+            }
+
+            ventanaEliminar.close();
+
+            if (respuesta.ok) {
+                mensajePeriodos.textContent = "Periodo eliminado";
+                // Volvemos a pedir los datos: cambia la lista, el día del ciclo y las predicciones
+                await cargarEstadisticas();
+            } else {
+                // 400 / 404...: enseñamos el error que manda el servidor
+                const datos = await respuesta.json();
+                mensajePeriodos.textContent = datos.error || "No se pudo eliminar el periodo";
+                mensajePeriodos.classList.add("error");
+            }
+
+        } catch (error) {
+            console.error("Error de conexión:", error);
+            ventanaEliminar.close();
+            mensajePeriodos.textContent = "No se pudo conectar con el servidor";
+            mensajePeriodos.classList.add("error");
+        }
+
+        periodoAEliminar = null;
+    });
+
+
+    // Al abrir la página, cargamos todo
+    cargarEstadisticas();
 });

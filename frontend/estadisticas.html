@@ -37,6 +37,8 @@
                 <!-- Mientras carga solo se ve este texto; luego se sustituye por las filas -->
                 <li class="texto-vacio">Cargando...</li>
             </ul>
+            <!-- Aquí estadisticas.js escribe "Periodo eliminado" o el error -->
+            <p id="mensaje-periodos" class="mensaje-ajuste"></p>
         </section>
 
         <!-- ===================== HOY: día del ciclo y posibles síntomas ===================== -->
@@ -59,6 +61,19 @@
             <!-- Explica de dónde sale la predicción (o por qué todavía no hay) -->
             <p id="explicacion-sintomas" class="nota nota-abajo"></p>
         </section>
+
+        <!-- ===================== VENTANA: CONFIRMAR ELIMINAR PERIODO =====================
+             Se abre al pulsar la papelera de un periodo. Borrar no se puede deshacer,
+             así que preguntamos antes. estadisticas.js escribe qué periodo es. -->
+        <dialog id="ventana-eliminar" class="ventana">
+            <h3 class="titulo-ventana">¿Eliminar este periodo?</h3>
+            <!-- Por ejemplo: "Del 04/11 al 09/11. No se puede deshacer." -->
+            <p id="texto-eliminar" class="texto-peligro"></p>
+            <div class="acciones">
+                <button id="confirmar-eliminar" class="boton boton-peligro" type="button">ELIMINAR</button>
+                <button id="cancelar-eliminar" class="boton boton-secundario" type="button">CANCELAR</button>
+            </div>
+        </dialog>
 
         <!-- ===================== MENÚ LATERAL =====================
              Escondido a la izquierda hasta que js/menu.js le pone la clase "abierto".

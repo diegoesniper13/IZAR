@@ -187,6 +187,33 @@ def eliminar_cuenta(usuario)->bool:
     return True
 
 
+
+# Borra UN periodo de una usuaria, el que empieza en la fecha "inicio".
+# Basta con la fecha de inicio para saber cuál es: dos periodos de la misma
+# usuaria nunca pueden empezar el mismo día (no se pueden solapar).
+def eliminar_periodo(usuario, inicio) -> bool:
+    """Borra el periodo de una usuaria que empieza en la fecha dada. Devuelve False si no existía."""
+    conexion = sqlite3.connect(RUTA_BD)
+    cursor = conexion.cursor()
+    # Tienen que cumplirse las DOS condiciones (AND), y las dos van en el WHERE de "periodos":
+    #   - que el periodo empiece ese día (columna inicio)
+    #   - que sea de ESA usuaria: así nunca se puede borrar el periodo de otra persona
+    #     que empezó el mismo día. La subconsulta (entre paréntesis) solo busca su id.
+    # El orden de la tupla es el de los ?: primero la fecha, luego el usuario.
+    cursor.execute(
+        "DELETE FROM periodos WHERE inicio = ? "
+        "AND usuario_id = (SELECT id FROM usuarios WHERE usuario = ?)",
+        (inicio, usuario)
+    )
+    conexion.commit()
+    filas_cambiadas = cursor.rowcount           # cuántos periodos se han borrado (0 o 1)
+    conexion.close()                             # cerramos ANTES de los return
+    if filas_cambiadas == 0:                     # no había ningún periodo con ese inicio: no se borró nada
+        return False
+    return True
+
+
+
 # Comprueba usuario y contraseña. Devuelve True si son correctos.
 def iniciar_sesion(usuario, contrasena) -> bool:
     """Comprueba si el usuario existe y si la contraseña coincide con su hash guardado."""

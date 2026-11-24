@@ -519,6 +519,35 @@ def borrar_cuenta():
 
 
 # ---------------------------------------------------------------
+# RUTA 10B: POST /periodo/borrar  ->  elimina UN periodo de la usuaria
+# ---------------------------------------------------------------
+# Recibe la fecha de inicio del periodo: {"inicio": "2026-11-04"}.
+# Con eso basta para saber cuál es, porque dos periodos de la misma
+# usuaria nunca pueden empezar el mismo día (no se pueden solapar).
+# La usa el botón de la papelera de estadisticas.html.
+@app.route("/periodo/borrar",methods=["POST"])
+def borrar_periodo():
+    # 1. SEGURIDAD: la usuaria sale de la sesión, nunca del JSON
+    #    (si saliera del JSON, cualquiera podría borrar periodos de otra persona)
+    usuario = session.get("usuario")
+    if not usuario:
+        return jsonify({"error":"inicia sesion antes"}),401
+
+    # 2. LEER LA FECHA: si los datos llegan mal -> 400 (la petición está mal hecha)
+    datos = request.get_json(silent=True)
+    try:
+        fecha = date.fromisoformat(datos["inicio"])     # texto "2026-11-08" -> fecha de verdad
+    except (KeyError, TypeError, ValueError):          # falta la clave, no hay JSON o la fecha no existe
+        return jsonify({"error": "faltan datos"}), 400
+
+    # 3. BORRAR: si los datos eran buenos pero no había ningún periodo
+    #    con esa fecha -> 404 (lo que buscas no existe)
+    if not bd.eliminar_periodo(usuario,fecha):
+        return jsonify({"error":"periodo no existe"}),404
+    return jsonify({"true":True}),200
+
+
+# ---------------------------------------------------------------
 # RUTA 11: GET /calendario  ->  últimos 2 periodos + predicción para el calendario
 # ---------------------------------------------------------------
 # Responde siempre con "periodos" (los últimos 2 reales) y "prediccion".

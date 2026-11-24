@@ -663,6 +663,33 @@ body.sin-scroll {
     border-radius: 20px;
 }
 
+/* Duración + papelera, juntas a la derecha de cada fila */
+.derecha-periodo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Papelera para eliminar un periodo: pequeña y gris para que no se pulse sin querer;
+   se pone roja al pasar por encima, como el botón "Borrar hoy" */
+.boton-eliminar-periodo {
+    width: 30px;
+    height: 30px;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    background: none;
+    font-size: 14px;
+    cursor: pointer;
+    opacity: 0.55;                 /* un poco apagada mientras no se usa */
+    transition: opacity 0.2s, background-color 0.2s, border-color 0.2s;
+}
+.boton-eliminar-periodo:hover,
+.boton-eliminar-periodo:focus-visible {
+    opacity: 1;
+    background-color: #FFEBEE;
+    border-color: #D32F2F;
+}
+
 /* --- Caja "Hoy" --- */
 .dato-grande {
     text-align: center;
